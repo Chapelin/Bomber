@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <title>hello phaser!</title>
-    <script src="phaser.min.js"></script>
+    <script src="phaser.js"></script>
     <script src="socket.io.js"></script>
 </head>
 <body>
@@ -11,7 +11,6 @@
     <script type="text/javascript">
 
         window.onload = function() {
-            var socket;
             var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update : update });
             
             var platforms;
@@ -23,102 +22,62 @@
             var son;
             var baddies;
             var end = false;
-            function preload () {
+            var map;
+            var layer;
 
-                game.load.spritesheet("baddy","assets/baddie.png",32,32);
-                game.load.image("sky", "assets/sky.png");
-                game.load.image("ground", "assets/platform.png");
-                game.load.image("star", "assets/star.png");
+            function preload () {
+                game.load.tilemap('map', 'assets/map.csv', null, Phaser.Tilemap.CSV);
+                game.load.image('tiles', 'assets/map1.png');
+
                 game.load.spritesheet("dude", "assets/dude.png",32,48);
-                game.load.audio("starSound","assets/1-up.wav",true)
-                game.load.audio("sautSound","assets/saut.wav",true)
-                game.load.audio("killSound","assets/tuyau.wav",true)
-                game.load.audio("killedSound","assets/game-over.wav",true)
-                
+
 
             }
 
             function create () {
                 son = {};
+                
+                map = game.add.tilemap('map',16,16);
+                map.addTilesetImage('tiles');
+
+                map.setCollision(0);
+
+
+                layer = map.createLayer(0);
+                layer.debug = true;
+                layer.resizeWorld();
                 game.physics.startSystem(Phaser.Physics.ARCADE);
-                game.add.sprite(0,0,"sky");
-                platforms = game.add.group();
-                platforms.enableBody = true;
-                baddies = game.add.group();
-                baddies.enableBody = true;
-                var ground = platforms.create(0,game.world.height-64,'ground');
-                ground.scale.setTo(2,2);
 
-                ground.body.immovable = true;
-
-                var le = platforms.create(400,400,'ground');
-                le.body.immovable = true;
-                le = platforms.create(-150,250,'ground');
-                le.body.immovable = true;
-
-                le = platforms.create(0,0,'ground');
-                le.body.immovable = true;
-                le.scale.setTo(0.1,30);
-
-
-                le = platforms.create(game.world.width-40,0,'ground');
-                le.body.immovable = true;
-                le.scale.setTo(0.1,30);
 
 
                 player = game.add.sprite(32,40, 'dude');
-                game.physics.arcade.enable(player);
+                game.physics.enable(player);
 
-                player.body.bounce.y = 0.2;
-                player.body.gravity.y = 400;
+                player.body.bounce.y = 0;
+                player.body.gravity.y = 0;
                 player.body.collideWorldBounds = true;
                 player.animations.add('left', [0, 1, 2, 3], 10, true);
                 player.animations.add('right', [5, 6, 7, 8], 10, true);
-                socket = io.connect('http://localhost:5588');
-                socket.on('monster',initMonster);
-
-                /*initBaddy(432,32,-150, 'left');
-                initBaddy(302,60,150, 'right');
-                initBaddy(532,60,-150, 'left');*/
-
-
 
                 game.stage.disableVisibilityChange = true;
 
                 cursors = game.input.keyboard.createCursorKeys();
 
-
-                stars = game.add.group();
-                stars.enableBody = true;
-                for(var i=1;i<11;i++)
-                {
-                    var star = stars.create(i*70,0, 'star');
-                    star.body.gravity.y = 50;
-
-                    star.body.bounce.y = 0.3 + Math.random()*0.2;
-                }
-
-
-                scoreText = game.add.text(16,16,'score : 0', {fontSize : '32px', fill: '#000'});
-                son.etoile = game.add.audio('starSound');
-                son.kill = game.add.audio('killSound');
-                son.killed = game.add.audio('killedSound');
-                son.saut = game.add.audio('sautSound');
-
             }
+
+            function dummy(t,y)
+            {
+                console.log(t);
+            }
+
+
 
             function update() {
                 player.body.velocity.x = 0;
-                game.physics.arcade.collide(player,platforms);
-                game.physics.arcade.collide(baddies,platforms);
-                game.physics.arcade.collide(baddies,baddies);
-                game.physics.arcade.collide(stars,platforms);
-                game.physics.arcade.overlap(player,stars,collectStar,null, this);
+                player.body.velocity.y = 0;
+                game.physics.arcade.collide(player,layer, dummy);
 
 
-
-                game.physics.arcade.overlap(player,baddies,touche,null, this);
-                CheckWin();
                 
                 if(cursors.left.isDown)
                 {
@@ -131,110 +90,25 @@
                         player.animations.play('right');
                     }
                     else
-                    {
-                        player.animations.stop();
-                        player.frame = 4;
-                    }
-
-                    if(cursors.up.isDown && player.body.touching.down)
-                    {
-                        player.body.velocity.y = -350;
-                        son.saut.play();
-                    }
-
-
-                    baddies.forEachAlive(function(baddy,game)
-                    {
-
-                     if(baddy.body.touching.left)
-                     {
-                        baddy.body.velocity.x = 150;
-                        baddy.animations.play("right");
-                    }
-                    else
-                        if(baddy.body.touching.right)
+                        if (cursors.up.isDown) {
+                            player.body.velocity.y = -150;
+                            player.animations.play('right');
+                        }
+                        else  
+                           if (cursors.down.isDown) {
+                            player.body.velocity.y = +150;
+                            player.animations.play('right');
+                        }
+                        else  
                         {
-                            baddy.body.velocity.x = -150;
-                            baddy.animations.play("left");
+                            player.animations.stop();
+                            player.frame = 4;
                         }
-                    });
-                }
-
-
-                function initBaddy(x,y,vx, dir)
-                {
-                    baddy = baddies.create(x,y,"baddy")
-                    game.physics.arcade.enable(baddy);
-                    baddy.body.collideWorldBounds = true;
-                    baddy.body.gravity.y = 300;
-                    baddy.animations.add("left", [0,1],10,true);
-                    baddy.animations.add("right",[2,3],10,true);
-                    baddy.frame = 1;
-                    baddy.body.velocity.x = vx;
-                    baddy.animations.play(dir);
-                };
-
-
-                  function initMonster(obj)
-                {
-                    initBaddy(obj.x,obj.y, -150, 'left');
-                };
-                function majScore(val)
-                {
-                    score += val;
-                    scoreText.text = 'Score : '+score;
-                }
-
-
-
-                function collectStar (player, star)
-                {
-                    star.kill();
-                    majScore(1);
-
-                    son.etoile.play();
-                }
-
-
-                function touche(player,baddy)
-                {
-                    if(player.body.velocity.y>0 && player.body.y < baddy.body.y -5)
-                        {//on etait en saut => en redescente du saut
-                            baddy.kill();
-                            majScore(10);
-                            son.kill.play();
-                            player.body.velocity.y = -100
-                        }
-                        else
+                        if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR))
                         {
-                            player.kill();
-                            son.killed.play();
-                            Fin(false); 
+                            majScore(524);
                         }
-
                     }
-
-                function CheckWin()
-                {
-                    if((stars.countLiving() + baddies.countLiving() ==0 )&& !end)
-                        Fin(true);
-                }
-                function Fin(win)
-                {
-                    end = true;
-                    if(win)
-                    {
-                        socket.emit('win',null);
-                                game.add.text(60,60,'You WON§§§§', {fontSize : '42px', fill: '#000'});
-                    }
-                    else
-                    {
-                        socket.emit('loose',null);
-                        game.add.text(60,60,'PERDUUUUUUU', {fontSize : '42px', fill: '#000'});
-                        player.kill();
-                    }
-                }
-
                 };
 
             </script>
