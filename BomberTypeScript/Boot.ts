@@ -1,4 +1,5 @@
-﻿module Bomber {
+﻿///<reference path='app.ts' />
+module Bomber {
     export class Boot extends Phaser.State {
         
 

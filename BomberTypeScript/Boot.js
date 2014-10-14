@@ -11,16 +11,14 @@ var Bomber;
         function Boot() {
             _super.apply(this, arguments);
         }
-        Boot.prototype.create = function () {
-            this.game.load.spritesheet("bomberman", "assets/bomberman.png", 16, 32, 12, 1, 1);
-            this.game.load.spritesheet("decors", "assets/sol.png", 16, 16);
-            this.game.load.tilemap("map", "assets/map.Csv", null, Phaser.Tilemap.CSV);
+        Boot.prototype.preload = function () {
         };
 
-        Boot.prototype.preload = function () {
-            this.game.state.start("Level");
+        Boot.prototype.create = function () {
+            this.game.state.start("Level", false, false);
         };
         return Boot;
     })(Phaser.State);
     Bomber.Boot = Boot;
 })(Bomber || (Bomber = {}));
+//# sourceMappingURL=Boot.js.map

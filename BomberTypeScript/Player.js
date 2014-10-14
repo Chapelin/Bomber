@@ -15,3 +15,4 @@ var Bomber;
     })(Phaser.Sprite);
     Bomber.Player = Player;
 })(Bomber || (Bomber = {}));
+//# sourceMappingURL=Player.js.map
