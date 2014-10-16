@@ -1,0 +1,10 @@
+{
+  "name": "BomberServer",
+  "version": "0.0.0",
+  "description": "BomberServer",
+  "main": "app.js",
+  "author": {
+    "name": "Antoine-Portable",
+    "email": ""
+  }
+}

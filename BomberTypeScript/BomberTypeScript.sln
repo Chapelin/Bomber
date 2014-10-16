@@ -5,6 +5,8 @@ VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BomberTypeScript", "BomberTypeScript.csproj", "{27482EA4-A545-4A04-9891-499B2DC8FD83}"
 EndProject
+Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "BomberServer", "..\BomberServer\BomberServer.njsproj", "{C2F17D4E-9791-4C11-A153-99141B495D5F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{27482EA4-A545-4A04-9891-499B2DC8FD83}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{27482EA4-A545-4A04-9891-499B2DC8FD83}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{27482EA4-A545-4A04-9891-499B2DC8FD83}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C2F17D4E-9791-4C11-A153-99141B495D5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2F17D4E-9791-4C11-A153-99141B495D5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2F17D4E-9791-4C11-A153-99141B495D5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C2F17D4E-9791-4C11-A153-99141B495D5F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
