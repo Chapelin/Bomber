@@ -51,7 +51,7 @@ var Bomber;
         __extends(Game, _super);
         function Game() {
             _super.call(this, 800, 600, Phaser.AUTO, 'content', null);
-
+            this.sock = io.connect("localhost:3000");
             this.state.add('Boot', Bomber.Boot, false);
 
             //this.state.add('Preloader', Preloader, false);
