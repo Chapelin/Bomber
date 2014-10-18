@@ -5,9 +5,9 @@
         map : Phaser.Tilemap;
   
         preload() {
-            this.game.load.spritesheet("bomberman", "assets/bomberman.png", 16, 32, 12, 1, 1);
-            this.game.load.spritesheet("decors", "assets/sol.png", 16, 16,2);
-            this.game.load.tilemap("map", "assets/map.csv", null, Phaser.Tilemap.CSV);
+            this.game.load.spritesheet("bomberman", "http://localhost:3001/bomberman.png", 16, 32, 12, 1, 1);
+            this.game.load.spritesheet("decors", "http://localhost:3001/sol.png", 16, 16,2);
+            this.game.load.tilemap("map", "http://localhost:3001/map.csv", null, Phaser.Tilemap.CSV);
         }
 
         create() {
