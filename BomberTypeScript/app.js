@@ -73,15 +73,17 @@ var Bomber;
         }
         Level.prototype.preload = function () {
             this.game.load.spritesheet("bomberman", "http://localhost:3001/bomberman.png", 16, 32, 12, 1, 1);
-            this.game.load.spritesheet("decors", "http://localhost:3001/sol.png", 16, 16, 2);
+            this.game.load.image("decors", "http://localhost:3001/sol.png");
             this.game.load.tilemap("map", "http://localhost:3001/map.csv", null, Phaser.Tilemap.CSV);
         };
 
         Level.prototype.create = function () {
-            this.map = this.game.add.tilemap("map");
+            this.map = this.game.add.tilemap("map", 16, 16);
             this.map.addTilesetImage('decors');
             var layer = this.map.createLayer(0);
-            this.game.stage.disableVisibilityChange = true;
+
+            //this.game.stage.disableVisibilityChange = true;
+            layer.resizeWorld();
         };
         return Level;
     })(Phaser.State);
