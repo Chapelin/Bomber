@@ -10,5 +10,10 @@ io.listen(3000).on("connection", handlesocket);
 
 function handlesocket(socket) {
     console.log("Connected");
+    socket.on("created", handleCreation);
+}
+
+function handleCreation(data) {
+    console.log("Data reçues en creation : " + data);
 }
 //# sourceMappingURL=server.js.map

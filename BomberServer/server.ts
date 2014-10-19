@@ -9,7 +9,12 @@ http.createServer(function (req, res) {
 io.listen(3000).on("connection", handlesocket);
 
 
-function handlesocket (socket) {
+function handlesocket (socket : io.Socket) {
     console.log("Connected");
+    socket.on("created", handleCreation);
 }
 
+function handleCreation(data: any[]) {
+    console.log("Data reçues en creation : " + data);
+   
+}

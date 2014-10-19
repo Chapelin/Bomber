@@ -51,7 +51,7 @@ var Bomber;
         __extends(Game, _super);
         function Game() {
             _super.call(this, 800, 600, Phaser.AUTO, 'content', null);
-            this.sock = io.connect("localhost:3000");
+
             this.state.add('Boot', Bomber.Boot, false);
 
             //this.state.add('Preloader', Preloader, false);
@@ -75,6 +75,7 @@ var Bomber;
             this.game.load.spritesheet("bomberman", "http://localhost:3001/bomberman.png", 16, 32, 12, 1, 1);
             this.game.load.image("decors", "http://localhost:3001/sol.png");
             this.game.load.tilemap("map", "http://localhost:3001/map.csv", null, Phaser.Tilemap.CSV);
+            this.sock = io.connect("localhost:3000");
         };
 
         Level.prototype.create = function () {
@@ -84,6 +85,7 @@ var Bomber;
 
             //this.game.stage.disableVisibilityChange = true;
             layer.resizeWorld();
+            this.joueur = new Bomber.Player(this.game, "toto", 15, 15, this.sock, "bomberman", 1);
         };
         return Level;
     })(Phaser.State);
@@ -93,8 +95,12 @@ var Bomber;
 (function (Bomber) {
     var Player = (function (_super) {
         __extends(Player, _super);
-        function Player() {
-            _super.apply(this, arguments);
+        function Player(game, name, x, y, sock, key, frame) {
+            _super.call(this, game, x, y, key, frame);
+            this.sock = sock;
+            this.name = name;
+            this.game.add.sprite(x, y, key, frame);
+            this.sock.emit("created", this.name);
         }
         return Player;
     })(Phaser.Sprite);
