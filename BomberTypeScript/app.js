@@ -51,7 +51,6 @@ var Bomber;
         __extends(Game, _super);
         function Game() {
             _super.call(this, 800, 600, Phaser.AUTO, 'content', null);
-
             this.state.add('Boot', Bomber.Boot, false);
 
             //this.state.add('Preloader', Preloader, false);
@@ -86,6 +85,7 @@ var Bomber;
             //this.game.stage.disableVisibilityChange = true;
             layer.resizeWorld();
             this.joueur = new Bomber.Player(this.game, "toto", 15, 15, this.sock, "bomberman", 1);
+            // var cursors = this.game.input.keyboard.createCursorKeys();
         };
         return Level;
     })(Phaser.State);
@@ -99,9 +99,14 @@ var Bomber;
             _super.call(this, game, x, y, key, frame);
             this.sock = sock;
             this.name = name;
-            this.game.add.sprite(x, y, key, frame);
+            this.game.add.existing(this);
             this.sock.emit("created", this.name);
         }
+        Player.prototype.update = function () {
+            _super.prototype.update.call(this);
+            console.log("player update");
+            this.sock.emit("updated", this.name);
+        };
         return Player;
     })(Phaser.Sprite);
     Bomber.Player = Player;

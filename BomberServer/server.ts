@@ -12,6 +12,11 @@ io.listen(3000).on("connection", handlesocket);
 function handlesocket (socket : io.Socket) {
     console.log("Connected");
     socket.on("created", handleCreation);
+    socket.on("updated", handleUpdate);
+}
+
+function handleUpdate(data: any[]) {
+    console.log("Updated : " + data);
 }
 
 function handleCreation(data: any[]) {

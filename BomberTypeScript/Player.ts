@@ -9,10 +9,15 @@
              super(game, x, y, key, frame);
              this.sock = sock;
              this.name = name;
-             this.game.add.sprite(x, y, key, frame);
+             this.game.add.existing(this);
              this.sock.emit("created", this.name);
          }
          
+         update() {
+             super.update();
+             console.log("player update");
+             this.sock.emit("updated", this.name);
+         }
 
      }
  }

@@ -20,10 +20,13 @@
             var layer = this.map.createLayer(0);
             //this.game.stage.disableVisibilityChange = true;
             layer.resizeWorld();
-            this.joueur = new Player(this.game, "toto", 15, 15, this.sock,"bomberman",1);
-            
-
+            this.joueur = new Player(this.game, "toto", 15, 15, this.sock, "bomberman", 1);
+           // var cursors = this.game.input.keyboard.createCursorKeys();
         }
+        
+        //update() {
+        //    console.log("update state");
+        //}
 
     }
 } 
