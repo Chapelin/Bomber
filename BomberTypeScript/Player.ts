@@ -19,5 +19,20 @@
              
          }
 
+         moveDown() {
+             this.y = this.y + 2;
+         }
+
+         moveUp() {
+             this.y = this.y - 2;
+         }
+
+         moveLeft() {
+             this.x = this.x - 2;
+         }
+
+         moveRight() {
+             this.x = this.x + 2;
+         }
      }
  }

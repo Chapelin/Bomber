@@ -94,18 +94,28 @@ var Bomber;
 
         Level.prototype.update = function () {
             if (this.cursors.down.isDown) {
-                this.sock.emit("move", "down");
+                this.joueur.moveDown();
+                this.sendMove(0 /* Down */);
             } else {
                 if (this.cursors.left.isDown) {
-                    this.sock.emit("move", "left");
+                    this.joueur.moveLeft();
+                    this.sendMove(2 /* Left */);
                 } else {
                     if (this.cursors.right.isDown) {
+                        this.joueur.moveRight();
+                        this.sendMove(3 /* Right */);
                     } else {
                         if (this.cursors.up.isDown) {
+                            this.joueur.moveUp();
+                            this.sendMove(0 /* Down */);
                         }
                     }
                 }
             }
+        };
+
+        Level.prototype.sendMove = function (type) {
+            this.sock.emit("move", new Bomber.MovementData(type, this.joueur));
         };
 
         Level.prototype.handleUserMoved = function (data) {
@@ -128,8 +138,44 @@ var Bomber;
         }
         Player.prototype.update = function () {
         };
+
+        Player.prototype.moveDown = function () {
+            this.y = this.y + 2;
+        };
+
+        Player.prototype.moveUp = function () {
+            this.y = this.y - 2;
+        };
+
+        Player.prototype.moveLeft = function () {
+            this.x = this.x - 2;
+        };
+
+        Player.prototype.moveRight = function () {
+            this.x = this.x + 2;
+        };
         return Player;
     })(Phaser.Sprite);
     Bomber.Player = Player;
+})(Bomber || (Bomber = {}));
+var Bomber;
+(function (Bomber) {
+    var MovementData = (function () {
+        function MovementData(typ, pos) {
+            this.finishingX = pos.x;
+            this.finishingY = pos.y;
+            this.typeMov = typ;
+        }
+        return MovementData;
+    })();
+    Bomber.MovementData = MovementData;
+
+    (function (MovementType) {
+        MovementType[MovementType["Down"] = 0] = "Down";
+        MovementType[MovementType["Up"] = 1] = "Up";
+        MovementType[MovementType["Left"] = 2] = "Left";
+        MovementType[MovementType["Right"] = 3] = "Right";
+    })(Bomber.MovementType || (Bomber.MovementType = {}));
+    var MovementType = Bomber.MovementType;
 })(Bomber || (Bomber = {}));
 //# sourceMappingURL=app.js.map

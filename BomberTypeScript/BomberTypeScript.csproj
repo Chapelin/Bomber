@@ -35,6 +35,7 @@
     <TypeScriptCompile Include="phaser.d.ts" />
     <TypeScriptCompile Include="Player.ts" />
     <TypeScriptCompile Include="Scripts\typings\socket.io-client\socket.io-client.d.ts" />
+    <TypeScriptCompile Include="SocketData.ts" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />

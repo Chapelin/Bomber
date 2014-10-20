@@ -8,10 +8,12 @@ http.createServer(function (req, res) {
 
 var manager = io.listen(3000);
 manager.on("connection", handlesocket);
+var socketDico = {};
 
 function handlesocket(socket) {
     console.log("Connected");
     var soc = socket;
+    var name = "";
     socket.on("created", handleCreation);
     socket.on("updated", handleUpdate);
     socket.on("move", handleMove);
@@ -22,11 +24,14 @@ function handlesocket(socket) {
 
     function handleMove(data) {
         console.log("Move : " + data);
+        console.log(data[0] + " " + data.x + " " + data.y + " " + data["x"]);
         soc.broadcast.emit("userMoved", data);
     }
 
     function handleCreation(data) {
         console.log("Data reçues en creation : " + data);
+        name = data.toString();
+        socketDico[name] = socket;
     }
 }
 //# sourceMappingURL=server.js.map
