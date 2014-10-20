@@ -71,6 +71,7 @@ var Bomber;
             _super.apply(this, arguments);
         }
         Level.prototype.preload = function () {
+            this.game.load.crossOrigin = "Anonymous";
             this.game.load.spritesheet("bomberman", "http://localhost:3001/bomberman.png", 16, 32, 12, 1, 1);
             this.game.load.image("decors", "http://localhost:3001/sol.png");
             this.game.load.tilemap("map", "http://localhost:3001/map.csv", null, Phaser.Tilemap.CSV);
@@ -85,7 +86,30 @@ var Bomber;
             //this.game.stage.disableVisibilityChange = true;
             layer.resizeWorld();
             this.joueur = new Bomber.Player(this.game, "toto", 15, 15, this.sock, "bomberman", 1);
+
             // var cursors = this.game.input.keyboard.createCursorKeys();
+            this.cursors = this.game.input.keyboard.createCursorKeys();
+            this.sock.on("userMoved", this.handleUserMoved);
+        };
+
+        Level.prototype.update = function () {
+            if (this.cursors.down.isDown) {
+                this.sock.emit("move", "down");
+            } else {
+                if (this.cursors.left.isDown) {
+                    this.sock.emit("move", "left");
+                } else {
+                    if (this.cursors.right.isDown) {
+                    } else {
+                        if (this.cursors.up.isDown) {
+                        }
+                    }
+                }
+            }
+        };
+
+        Level.prototype.handleUserMoved = function (data) {
+            console.log(data + " Moved");
         };
         return Level;
     })(Phaser.State);
@@ -103,9 +127,6 @@ var Bomber;
             this.sock.emit("created", this.name);
         }
         Player.prototype.update = function () {
-            _super.prototype.update.call(this);
-            console.log("player update");
-            this.sock.emit("updated", this.name);
         };
         return Player;
     })(Phaser.Sprite);

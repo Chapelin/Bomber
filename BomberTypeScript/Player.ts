@@ -1,6 +1,7 @@
 ﻿ module Bomber {
      export class Player extends Phaser.Sprite {
          
+         
          sock: io.Socket;
          name : string;
 
@@ -11,12 +12,11 @@
              this.name = name;
              this.game.add.existing(this);
              this.sock.emit("created", this.name);
+             
          }
          
          update() {
-             super.update();
-             console.log("player update");
-             this.sock.emit("updated", this.name);
+             
          }
 
      }
