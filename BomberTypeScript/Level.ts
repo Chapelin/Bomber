@@ -6,13 +6,16 @@
         sock: io.Socket;
         joueur: Player;
         cursors: Phaser.CursorKeys;
+        others: { [id: string]: Opponent};
 
         preload() {
+            this.others = {};
             this.game.load.crossOrigin = "Anonymous";
             this.game.load.spritesheet("bomberman", "http://localhost:3001/bomberman.png", 16, 32, 12, 1, 1);
             this.game.load.image("decors", "http://localhost:3001/sol.png");
             this.game.load.tilemap("map", "http://localhost:3001/map.csv", null, Phaser.Tilemap.CSV);
             this.sock = io.connect("localhost:3000");
+            
         }
 
         create() {
@@ -25,6 +28,10 @@
             // var cursors = this.game.input.keyboard.createCursorKeys();
             this.cursors = this.game.input.keyboard.createCursorKeys();
             this.sock.on("userMoved", this.handleUserMoved);
+            this.sock.on("userJoined", this.handleUserJoined);
+            this.sock.on("userQuit", this.handleUserQuit);
+
+
         }
 
         update() {
@@ -43,19 +50,30 @@
                         if (this.cursors.up.isDown) {
                             this.joueur.moveUp();
                             this.sendMove(MovementType.Down);
+                        } else {
+                            this.joueur.stop();
                         }
                     }
                 }
             }
         }
 
-
         sendMove(type: MovementType) {
-            this.sock.emit("move", new MovementData(type, this.joueur));
+            this.sock.emit("move", new MovementData(type, this.joueur, this.joueur.name));
         }
 
-        handleUserMoved(data: any) {
-            console.log(data + " Moved");
+        handleUserMoved(data: MovementData) {
+            console.log(data.name + " Moved");
+        }
+
+        handleUserJoined(data: string, toto : Level) {
+            console.log(data + " joined");
+
+            toto.others[data] = new Opponent();
+        }
+        handleUserQuit(data: string) {
+            console.log(data + " quitted");
+            this.others[data] = null;
         }
     }
 } 

@@ -4,11 +4,13 @@
         public typeMov: MovementType;
         public finishingX: number;
         public finishingY: number;
+        public name : string;
 
-        constructor(typ: MovementType,pos : IPositionableElement) {
+        constructor(typ: MovementType,pos : IPositionableElement, name : string) {
             this.finishingX = pos.x;
             this.finishingY = pos.y;
             this.typeMov = typ;
+            this.name = name;
         }
 
     }

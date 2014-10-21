@@ -13,7 +13,6 @@ var socketDico = {};
 
 function handlesocket(socket: io.Socket) {
     console.log("Connected");
-    var soc = socket;
     var name = "";
     socket.on("created", handleCreation);
     socket.on("updated", handleUpdate);
@@ -26,14 +25,17 @@ function handlesocket(socket: io.Socket) {
 
     function handleMove(data: MovementData) {
         console.log("Move : " + name);
-        console.log(data.typeMov + " " + data.finishingX + " " + data.finishingY );
-        soc.broadcast.emit("userMoved", data);
+        console.log(data.typeMov + " " + data.finishingX + " " + data.finishingY);
+        //the name handling is server side to avoid cheat
+        data.name = name;
+        socket.broadcast.emit("userMoved", data);
     }
 
     function handleCreation(data: any[]) {
         console.log("Data reçues en creation : " + data);
         name = data.toString();
         socketDico[name] = socket;
+        socket.broadcast.emit("userJoined", name);
 
     }
     
@@ -44,11 +46,13 @@ class MovementData {
         public typeMov: MovementType;
         public finishingX: number;
         public finishingY: number;
+        public name: string;
 
-    constructor(typ: MovementType, pos : IPositionableElement) {
+    constructor(typ: MovementType, pos : IPositionableElement, name : string) {
         this.finishingX = pos.x;
         this.finishingY = pos.y;
         this.typeMov = typ;
+        this.name = name;
     }
 
     }

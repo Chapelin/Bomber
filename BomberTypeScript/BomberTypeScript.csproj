@@ -32,6 +32,7 @@
     <TypeScriptCompile Include="Boot.ts" />
     <TypeScriptCompile Include="game.ts" />
     <TypeScriptCompile Include="Level.ts" />
+    <TypeScriptCompile Include="Opponent.ts" />
     <TypeScriptCompile Include="phaser.d.ts" />
     <TypeScriptCompile Include="Player.ts" />
     <TypeScriptCompile Include="Scripts\typings\socket.io-client\socket.io-client.d.ts" />

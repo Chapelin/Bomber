@@ -71,6 +71,7 @@ var Bomber;
             _super.apply(this, arguments);
         }
         Level.prototype.preload = function () {
+            this.others = {};
             this.game.load.crossOrigin = "Anonymous";
             this.game.load.spritesheet("bomberman", "http://localhost:3001/bomberman.png", 16, 32, 12, 1, 1);
             this.game.load.image("decors", "http://localhost:3001/sol.png");
@@ -90,6 +91,8 @@ var Bomber;
             // var cursors = this.game.input.keyboard.createCursorKeys();
             this.cursors = this.game.input.keyboard.createCursorKeys();
             this.sock.on("userMoved", this.handleUserMoved);
+            this.sock.on("userJoined", this.handleUserJoined);
+            this.sock.on("userQuit", this.handleUserQuit);
         };
 
         Level.prototype.update = function () {
@@ -108,6 +111,8 @@ var Bomber;
                         if (this.cursors.up.isDown) {
                             this.joueur.moveUp();
                             this.sendMove(0 /* Down */);
+                        } else {
+                            this.joueur.stop();
                         }
                     }
                 }
@@ -115,15 +120,34 @@ var Bomber;
         };
 
         Level.prototype.sendMove = function (type) {
-            this.sock.emit("move", new Bomber.MovementData(type, this.joueur));
+            this.sock.emit("move", new Bomber.MovementData(type, this.joueur, this.joueur.name));
         };
 
         Level.prototype.handleUserMoved = function (data) {
-            console.log(data + " Moved");
+            console.log(data.name + " Moved");
+        };
+
+        Level.prototype.handleUserJoined = function (data, toto) {
+            console.log(data + " joined");
+
+            toto.others[data] = new Bomber.Opponent();
+        };
+        Level.prototype.handleUserQuit = function (data) {
+            console.log(data + " quitted");
+            this.others[data] = null;
         };
         return Level;
     })(Phaser.State);
     Bomber.Level = Level;
+})(Bomber || (Bomber = {}));
+var Bomber;
+(function (Bomber) {
+    var Opponent = (function () {
+        function Opponent() {
+        }
+        return Opponent;
+    })();
+    Bomber.Opponent = Opponent;
 })(Bomber || (Bomber = {}));
 var Bomber;
 (function (Bomber) {
@@ -154,6 +178,9 @@ var Bomber;
         Player.prototype.moveRight = function () {
             this.x = this.x + 2;
         };
+
+        Player.prototype.stop = function () {
+        };
         return Player;
     })(Phaser.Sprite);
     Bomber.Player = Player;
@@ -161,10 +188,11 @@ var Bomber;
 var Bomber;
 (function (Bomber) {
     var MovementData = (function () {
-        function MovementData(typ, pos) {
+        function MovementData(typ, pos, name) {
             this.finishingX = pos.x;
             this.finishingY = pos.y;
             this.typeMov = typ;
+            this.name = name;
         }
         return MovementData;
     })();
