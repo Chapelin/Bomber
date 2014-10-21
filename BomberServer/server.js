@@ -23,8 +23,8 @@ function handlesocket(socket) {
     }
 
     function handleMove(data) {
-        console.log("Move : " + data);
-        console.log(data[0] + " " + data.x + " " + data.y + " " + data["x"]);
+        console.log("Move : " + name);
+        console.log(data.typeMov + " " + data.finishingX + " " + data.finishingY);
         soc.broadcast.emit("userMoved", data);
     }
 
@@ -34,4 +34,21 @@ function handlesocket(socket) {
         socketDico[name] = socket;
     }
 }
+
+var MovementData = (function () {
+    function MovementData(typ, pos) {
+        this.finishingX = pos.x;
+        this.finishingY = pos.y;
+        this.typeMov = typ;
+    }
+    return MovementData;
+})();
+
+var MovementType;
+(function (MovementType) {
+    MovementType[MovementType["Down"] = 0] = "Down";
+    MovementType[MovementType["Up"] = 1] = "Up";
+    MovementType[MovementType["Left"] = 2] = "Left";
+    MovementType[MovementType["Right"] = 3] = "Right";
+})(MovementType || (MovementType = {}));
 //# sourceMappingURL=server.js.map

@@ -24,9 +24,9 @@ function handlesocket(socket: io.Socket) {
 
     }
 
-    function handleMove(data: any) {
-        console.log("Move : " + data);
-        console.log(data[0] + " " + data.x + " " + data.y + " "+data["x"]);
+    function handleMove(data: MovementData) {
+        console.log("Move : " + name);
+        console.log(data.typeMov + " " + data.finishingX + " " + data.finishingY );
         soc.broadcast.emit("userMoved", data);
     }
 
@@ -37,5 +37,32 @@ function handlesocket(socket: io.Socket) {
 
     }
     
+}
+
+
+class MovementData {
+        public typeMov: MovementType;
+        public finishingX: number;
+        public finishingY: number;
+
+    constructor(typ: MovementType, pos : IPositionableElement) {
+        this.finishingX = pos.x;
+        this.finishingY = pos.y;
+        this.typeMov = typ;
+    }
+
+    }
+
+ interface IPositionableElement {
+    x: number;
+    y: number;
+}
+
+
+ enum MovementType {
+    Down = 0,
+    Up,
+    Left,
+    Right
 }
 
