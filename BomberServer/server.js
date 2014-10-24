@@ -32,11 +32,36 @@ function handlesocket(socket) {
 
     function handleCreation(data) {
         console.log("Data reçues en creation : " + data);
-        name = data.toString();
-        socketDico[name] = socket;
-        socket.broadcast.emit("userJoined", name);
+        name = data;
+        socketDico[name] = new InfoPlayer();
+        socketDico[name].socket = socket;
+
+        socketDico[name].data = new UserJoinedData(data, { x: 70, y: 70 });
+        socket.broadcast.emit("userJoined", socketDico[name].data);
+
+        for (var opponentName in socketDico) {
+            if (opponentName != name)
+                socket.emit("userJoined", socketDico[opponentName].data);
+        }
     }
 }
+
+var InfoPlayer = (function () {
+    function InfoPlayer() {
+    }
+    return InfoPlayer;
+})();
+
+var UserJoinedData = (function () {
+    function UserJoinedData(n, pos, skin) {
+        if (typeof skin === "undefined") { skin = "bomberman"; }
+        this.name = n;
+        this.x = pos.x;
+        this.y = pos.y;
+        this.skinName = skin;
+    }
+    return UserJoinedData;
+})();
 
 var MovementData = (function () {
     function MovementData(typ, pos, name) {

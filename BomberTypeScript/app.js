@@ -86,13 +86,13 @@ var Bomber;
 
             //this.game.stage.disableVisibilityChange = true;
             layer.resizeWorld();
-            this.joueur = new Bomber.Player(this.game, "toto", 15, 15, this.sock, "bomberman", 1);
+            this.joueur = new Bomber.Player(this.game, "toto" + Date.now(), 15, 15, this.sock, "bomberman", 1);
 
             // var cursors = this.game.input.keyboard.createCursorKeys();
             this.cursors = this.game.input.keyboard.createCursorKeys();
-            this.sock.on("userMoved", this.handleUserMoved);
-            this.sock.on("userJoined", this.handleUserJoined);
-            this.sock.on("userQuit", this.handleUserQuit);
+            this.sock.on("userMoved", this.handleUserMoved.bind(this));
+            this.sock.on("userJoined", this.handleUserJoined.bind(this));
+            this.sock.on("userQuit", this.handleUserQuit.bind(this));
         };
 
         Level.prototype.update = function () {
@@ -125,12 +125,12 @@ var Bomber;
 
         Level.prototype.handleUserMoved = function (data) {
             console.log(data.name + " Moved");
+            this.others[data.name].HandleMovement(data);
         };
 
-        Level.prototype.handleUserJoined = function (data, toto) {
-            console.log(data + " joined");
-
-            toto.others[data] = new Bomber.Opponent();
+        Level.prototype.handleUserJoined = function (data) {
+            console.log(data.name + " joined");
+            this.others[data.name] = new Bomber.Opponent(this.game, data.x, data.y, data.skinName, 1);
         };
         Level.prototype.handleUserQuit = function (data) {
             console.log(data + " quitted");
@@ -142,11 +142,19 @@ var Bomber;
 })(Bomber || (Bomber = {}));
 var Bomber;
 (function (Bomber) {
-    var Opponent = (function () {
-        function Opponent() {
+    var Opponent = (function (_super) {
+        __extends(Opponent, _super);
+        function Opponent(game, x, y, key, frame) {
+            _super.call(this, game, x, y, key, frame);
+            this.name = name;
+            this.game.add.existing(this);
         }
+        Opponent.prototype.HandleMovement = function (content) {
+            this.x = content.finishingX;
+            this.y = content.finishingY;
+        };
         return Opponent;
-    })();
+    })(Phaser.Sprite);
     Bomber.Opponent = Opponent;
 })(Bomber || (Bomber = {}));
 var Bomber;
@@ -187,6 +195,18 @@ var Bomber;
 })(Bomber || (Bomber = {}));
 var Bomber;
 (function (Bomber) {
+    var UserJoinedData = (function () {
+        function UserJoinedData(n, pos, skin) {
+            if (typeof skin === "undefined") { skin = "bomberman"; }
+            this.name = n;
+            this.x = pos.x;
+            this.y = pos.y;
+            this.skinName = skin;
+        }
+        return UserJoinedData;
+    })();
+    Bomber.UserJoinedData = UserJoinedData;
+
     var MovementData = (function () {
         function MovementData(typ, pos, name) {
             this.finishingX = pos.x;

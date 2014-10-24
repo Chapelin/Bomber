@@ -24,12 +24,12 @@
             var layer = this.map.createLayer(0);
             //this.game.stage.disableVisibilityChange = true;
             layer.resizeWorld();
-            this.joueur = new Player(this.game, "toto", 15, 15, this.sock, "bomberman", 1);
+            this.joueur = new Player(this.game, "toto"+Date.now(), 15, 15, this.sock, "bomberman", 1);
             // var cursors = this.game.input.keyboard.createCursorKeys();
             this.cursors = this.game.input.keyboard.createCursorKeys();
-            this.sock.on("userMoved", this.handleUserMoved);
-            this.sock.on("userJoined", this.handleUserJoined);
-            this.sock.on("userQuit", this.handleUserQuit);
+            this.sock.on("userMoved", this.handleUserMoved.bind(this));
+            this.sock.on("userJoined", this.handleUserJoined.bind(this));
+            this.sock.on("userQuit", this.handleUserQuit.bind(this));
 
 
         }
@@ -64,12 +64,12 @@
 
         handleUserMoved(data: MovementData) {
             console.log(data.name + " Moved");
+            this.others[data.name].HandleMovement(data);
         }
 
-        handleUserJoined(data: string, toto : Level) {
-            console.log(data + " joined");
-
-            toto.others[data] = new Opponent();
+        handleUserJoined(data: UserJoinedData) {
+            console.log(data.name + " joined");
+            this.others[data.name] = new Opponent(this.game, data.x, data.y, data.skinName, 1);
         }
         handleUserQuit(data: string) {
             console.log(data + " quitted");

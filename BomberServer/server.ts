@@ -8,7 +8,7 @@ http.createServer(function (req, res) {
 
 var manager = io.listen(3000);
 manager.on("connection", handlesocket);
-var socketDico = {};
+var socketDico : {[id : string ]: InfoPlayer}= {};
 
 
 function handlesocket(socket: io.Socket) {
@@ -17,7 +17,7 @@ function handlesocket(socket: io.Socket) {
     socket.on("created", handleCreation);
     socket.on("updated", handleUpdate);
     socket.on("move", handleMove);
-    
+
     function handleUpdate(data: any[]) {
         console.log("Updated : " + data);
 
@@ -31,14 +31,43 @@ function handlesocket(socket: io.Socket) {
         socket.broadcast.emit("userMoved", data);
     }
 
-    function handleCreation(data: any[]) {
+    function handleCreation(data: string) {
         console.log("Data reçues en creation : " + data);
-        name = data.toString();
-        socketDico[name] = socket;
-        socket.broadcast.emit("userJoined", name);
+        name = data;
+        socketDico[name] = new InfoPlayer();
+        socketDico[name].socket = socket;
 
+        socketDico[name].data = new UserJoinedData(data, { x: 70, y: 70 });
+        socket.broadcast.emit("userJoined", socketDico[name].data);
+        //we notify the new player with the others
+        for (var opponentName in socketDico) {
+            if (opponentName != name)
+                socket.emit("userJoined", socketDico[opponentName].data);
+        }
     }
+}
+
+class InfoPlayer
+{
+    socket: io.Socket;
+    data : UserJoinedData;
     
+}
+
+
+class UserJoinedData {
+    public name: string;
+    public x: number;
+    public y: number;
+    //Later use
+    public skinName: string;
+
+    constructor(n: string, pos: IPositionableElement, skin: string = "bomberman") {
+        this.name = n;
+        this.x = pos.x;
+        this.y = pos.y;
+        this.skinName = skin;
+    }
 }
 
 
