@@ -167,38 +167,60 @@ var Bomber;
             this.animations.add("walkLeft", Phaser.Animation.generateFrameNames("walk_left", 1, 3, ".png"), 10, true);
             this.animations.add("walkRight", Phaser.Animation.generateFrameNames("walk_right", 1, 3, ".png"), 10, true);
             this.sock.emit("created", this.name);
+            this.currentMovement = null;
         }
         Player.prototype.update = function () {
         };
 
         Player.prototype.moveDown = function () {
             this.y = this.y + 2;
-            this.setAnim("walkBot");
+            this.setAnim(0 /* Down */);
         };
 
         Player.prototype.moveUp = function () {
             this.y = this.y - 2;
-            this.setAnim("walkTop");
+            this.setAnim(1 /* Up */);
         };
 
         Player.prototype.moveLeft = function () {
             this.x = this.x - 2;
-            this.setAnim("walkLeft");
+            this.setAnim(2 /* Left */);
         };
 
         Player.prototype.moveRight = function () {
             this.x = this.x + 2;
-            this.setAnim("walkRight");
+            this.setAnim(3 /* Right */);
         };
 
-        Player.prototype.setAnim = function (animation) {
-            if (this.animations.currentAnim.name != animation) {
-                this.animations.play(animation);
+        Player.prototype.setAnim = function (deplacement) {
+            if (deplacement != this.currentMovement) {
+                this.currentMovement = deplacement;
+                var animeName = "";
+                switch (deplacement) {
+                    case 0 /* Down */:
+                        animeName = "walkBot";
+                        break;
+                    case 2 /* Left */:
+                        animeName = "walkLeft";
+                        break;
+                    case 3 /* Right */:
+                        animeName = "walkRight";
+                        break;
+                    case 1 /* Up */:
+                        animeName = "walkTop";
+                        break;
+                    default:
+                }
+                this.animations.play(animeName);
             }
         };
 
         Player.prototype.stop = function () {
-            this.animations.currentAnim.stop();
+            if (this.animations != null) {
+                this.animations.currentAnim.stop();
+                this.animations.currentAnim.frame = 2;
+                this.currentMovement = null;
+            }
         };
         return Player;
     })(Phaser.Sprite);
