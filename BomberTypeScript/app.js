@@ -73,9 +73,9 @@ var Bomber;
         Level.prototype.preload = function () {
             this.others = {};
             this.game.load.crossOrigin = "Anonymous";
-            this.game.load.spritesheet("bomberman", "http://localhost:3001/bomberman.png", 16, 32, 12, 1, 1);
             this.game.load.image("decors", "http://localhost:3001/sol.png");
             this.game.load.tilemap("map", "http://localhost:3001/map.csv", null, Phaser.Tilemap.CSV);
+            this.game.load.atlasJSONArray("bomberman", "http://localhost:3001/bomberman/bb.png", "http://localhost:3001/bomberman/bb_json.json");
             this.sock = io.connect("localhost:3000");
         };
 
@@ -83,12 +83,8 @@ var Bomber;
             this.map = this.game.add.tilemap("map", 16, 16);
             this.map.addTilesetImage('decors');
             var layer = this.map.createLayer(0);
-
-            //this.game.stage.disableVisibilityChange = true;
             layer.resizeWorld();
             this.joueur = new Bomber.Player(this.game, "toto" + Date.now(), 15, 15, this.sock, "bomberman", 1);
-
-            // var cursors = this.game.input.keyboard.createCursorKeys();
             this.cursors = this.game.input.keyboard.createCursorKeys();
             this.sock.on("userMoved", this.handleUserMoved.bind(this));
             this.sock.on("userJoined", this.handleUserJoined.bind(this));
@@ -166,7 +162,9 @@ var Bomber;
             this.sock = sock;
             this.name = name;
             this.game.add.existing(this);
+            this.animations.add("walkTop", Phaser.Animation.generateFrameNames("walk_top", 1, 3, ".png"), 10, true);
             this.sock.emit("created", this.name);
+            this.animations.play("walkTop");
         }
         Player.prototype.update = function () {
         };

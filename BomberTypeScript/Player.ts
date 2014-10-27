@@ -11,7 +11,9 @@
             this.sock = sock;
             this.name = name;
             this.game.add.existing(this);
+            this.animations.add("walkTop", Phaser.Animation.generateFrameNames("walk_top", 1, 3, ".png"), 10, true);
             this.sock.emit("created", this.name);
+            this.animations.play("walkTop");
 
         }
 
