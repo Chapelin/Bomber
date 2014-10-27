@@ -163,29 +163,42 @@ var Bomber;
             this.name = name;
             this.game.add.existing(this);
             this.animations.add("walkTop", Phaser.Animation.generateFrameNames("walk_top", 1, 3, ".png"), 10, true);
+            this.animations.add("walkBot", Phaser.Animation.generateFrameNames("walk_bot", 1, 3, ".png"), 10, true);
+            this.animations.add("walkLeft", Phaser.Animation.generateFrameNames("walk_left", 1, 3, ".png"), 10, true);
+            this.animations.add("walkRight", Phaser.Animation.generateFrameNames("walk_right", 1, 3, ".png"), 10, true);
             this.sock.emit("created", this.name);
-            this.animations.play("walkTop");
         }
         Player.prototype.update = function () {
         };
 
         Player.prototype.moveDown = function () {
             this.y = this.y + 2;
+            this.setAnim("walkBot");
         };
 
         Player.prototype.moveUp = function () {
             this.y = this.y - 2;
+            this.setAnim("walkTop");
         };
 
         Player.prototype.moveLeft = function () {
             this.x = this.x - 2;
+            this.setAnim("walkLeft");
         };
 
         Player.prototype.moveRight = function () {
             this.x = this.x + 2;
+            this.setAnim("walkRight");
+        };
+
+        Player.prototype.setAnim = function (animation) {
+            if (this.animations.currentAnim.name != animation) {
+                this.animations.play(animation);
+            }
         };
 
         Player.prototype.stop = function () {
+            this.animations.currentAnim.stop();
         };
         return Player;
     })(Phaser.Sprite);
