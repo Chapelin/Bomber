@@ -147,6 +147,56 @@ var Bomber;
             this.name = name;
             this.currentMovement = null;
         }
+        MovingObject.prototype.moveDown = function () {
+            this.y = this.y + 2;
+            this.setAnim(0 /* Down */);
+        };
+
+        MovingObject.prototype.moveUp = function () {
+            this.y = this.y - 2;
+            this.setAnim(1 /* Up */);
+        };
+
+        MovingObject.prototype.moveLeft = function () {
+            this.x = this.x - 2;
+            this.setAnim(2 /* Left */);
+        };
+
+        MovingObject.prototype.moveRight = function () {
+            this.x = this.x + 2;
+            this.setAnim(3 /* Right */);
+        };
+
+        MovingObject.prototype.setAnim = function (deplacement) {
+            if (deplacement != this.currentMovement) {
+                this.currentMovement = deplacement;
+                var animeName = "";
+                switch (deplacement) {
+                    case 0 /* Down */:
+                        animeName = "walkBot";
+                        break;
+                    case 2 /* Left */:
+                        animeName = "walkLeft";
+                        break;
+                    case 3 /* Right */:
+                        animeName = "walkRight";
+                        break;
+                    case 1 /* Up */:
+                        animeName = "walkTop";
+                        break;
+                    default:
+                }
+                this.animations.play(animeName);
+            }
+        };
+
+        MovingObject.prototype.stop = function () {
+            if (this.animations != null) {
+                this.animations.currentAnim.stop();
+                this.animations.currentAnim.frame = 2;
+                this.currentMovement = null;
+            }
+        };
         return MovingObject;
     })(Phaser.Sprite);
     Bomber.MovingObject = MovingObject;
@@ -182,57 +232,6 @@ var Bomber;
             this.sock.emit("created", this.name);
         }
         Player.prototype.update = function () {
-        };
-
-        Player.prototype.moveDown = function () {
-            this.y = this.y + 2;
-            this.setAnim(0 /* Down */);
-        };
-
-        Player.prototype.moveUp = function () {
-            this.y = this.y - 2;
-            this.setAnim(1 /* Up */);
-        };
-
-        Player.prototype.moveLeft = function () {
-            this.x = this.x - 2;
-            this.setAnim(2 /* Left */);
-        };
-
-        Player.prototype.moveRight = function () {
-            this.x = this.x + 2;
-            this.setAnim(3 /* Right */);
-        };
-
-        Player.prototype.setAnim = function (deplacement) {
-            if (deplacement != this.currentMovement) {
-                this.currentMovement = deplacement;
-                var animeName = "";
-                switch (deplacement) {
-                    case 0 /* Down */:
-                        animeName = "walkBot";
-                        break;
-                    case 2 /* Left */:
-                        animeName = "walkLeft";
-                        break;
-                    case 3 /* Right */:
-                        animeName = "walkRight";
-                        break;
-                    case 1 /* Up */:
-                        animeName = "walkTop";
-                        break;
-                    default:
-                }
-                this.animations.play(animeName);
-            }
-        };
-
-        Player.prototype.stop = function () {
-            if (this.animations != null) {
-                this.animations.currentAnim.stop();
-                this.animations.currentAnim.frame = 2;
-                this.currentMovement = null;
-            }
         };
         return Player;
     })(Bomber.MovingObject);
