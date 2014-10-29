@@ -12,29 +12,33 @@
             this.speed = 2;
             this.name = name;
             this.currentMovement = null;
+            this.animations.add("walkTop", Phaser.Animation.generateFrameNames("walk_top", 1, 3, ".png"), 10, true);
+            this.animations.add("walkBot", Phaser.Animation.generateFrameNames("walk_bot", 1, 3, ".png"), 10, true);
+            this.animations.add("walkLeft", Phaser.Animation.generateFrameNames("walk_left", 1, 3, ".png"), 10, true);
+            this.animations.add("walkRight", Phaser.Animation.generateFrameNames("walk_right", 1, 3, ".png"), 10, true);
         }
 
         moveDown() {
-            this.y = this.y + 2;
+            this.y = this.y + this.speed;
             this.setAnim(MovementType.Down);
         }
 
         moveUp() {
-            this.y = this.y - 2;
+            this.y = this.y - this.speed;
             this.setAnim(MovementType.Up);
         }
 
         moveLeft() {
-            this.x = this.x - 2;
+            this.x = this.x - this.speed;
             this.setAnim(MovementType.Left);
         }
 
         moveRight() {
-            this.x = this.x + 2;
+            this.x = this.x + this.speed;
             this.setAnim(MovementType.Right);
         }
 
-        private setAnim(deplacement: MovementType) {
+        public setAnim(deplacement: MovementType) {
             if (deplacement != this.currentMovement) {
                 this.currentMovement = deplacement;
                 var animeName = "";

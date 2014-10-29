@@ -15,7 +15,7 @@
             this.game.load.tilemap("map", "http://localhost:3001/map.csv", null, Phaser.Tilemap.CSV);
             this.game.load.atlasJSONArray("bomberman","http://localhost:3001/bomberman/bb.png","http://localhost:3001/bomberman/bb_json.json");
             this.sock = io.connect("localhost:3000");
-            
+            this.game.stage.disableVisibilityChange = true;
         }
 
         create() {
@@ -28,6 +28,7 @@
             this.sock.on("userMoved", this.handleUserMoved.bind(this));
             this.sock.on("userJoined", this.handleUserJoined.bind(this));
             this.sock.on("userQuit", this.handleUserQuit.bind(this));
+            this.sock.on("syncPosition", this.handleObjectSyncPosition.bind(this));
 
 
         }
@@ -67,11 +68,33 @@
 
         handleUserJoined(data: UserJoinedData) {
             console.log(data.name + " joined");
-            this.others[data.name] = new Opponent(this.game, data.x, data.y, data.skinName, 1);
+            this.others[data.name] = new Opponent(this.game,data.name, data.x, data.y, data.skinName, 1);
         }
         handleUserQuit(data: string) {
             console.log(data + " quitted");
             this.others[data] = null;
+        }
+
+        handleObjectSyncPosition(content: MovementData) {
+            console.log(content.name + "sync position");
+            var synced: MovingObject = null;
+            if (this.joueur.name == content.name) {
+                synced = this.joueur;
+            } else {
+                if (this.others.hasOwnProperty(content.name)) {
+                    synced = this.others[content.name];
+                }
+            }
+
+            if (synced !=null) {
+                synced.x = content.finishingX;
+                synced .y = content.finishingY;
+                if (content.typeMov == MovementType.Teleportation) {
+                    synced.stop();
+                } else {
+                    synced.setAnim(content.typeMov);
+                    }
+                }
         }
     }
 

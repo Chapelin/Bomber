@@ -1,16 +1,34 @@
 ﻿module Bomber {
-    export class Opponent extends Phaser.Sprite{
+    export class Opponent extends MovingObject {
         
-        constructor(game: Phaser.Game,  x: number, y: number,  key?: any, frame?: any) {
-            super(game, x, y, key, frame);
-            this.name = name;
-            this.game.add.existing(this);
+        constructor(game: Phaser.Game,name : string,  x: number, y: number,  key?: any, frame?: any) {
+            super(game,name, x, y, key, frame);
         }
 
 
         public handleMovement(content: MovementData) {
-            this.x = content.finishingX;
-            this.y = content.finishingY;
+
+            if (content.typeMov == MovementType.Down) {
+                this.moveDown();
+            } else {
+                if (content.typeMov == MovementType.Left) {
+                    this.moveLeft();
+                } else {
+                if (content.typeMov == MovementType.Right) {
+                        this.moveRight();
+                    } else {
+                    if (content.typeMov ==  MovementType.Up) {
+                            this.moveUp();
+                        } else {
+                            this.stop();
+                        }
+                    }
+                }
+            }
+
+            if (this.x != content.finishingX || this.y != content.finishingY) {
+                console.log("Error movement for " + this.name + " waited : " + content.finishingX + "," + content.finishingY + " | current : " + this.x + ", " + this.y);
+            }
         }
     }
 } 

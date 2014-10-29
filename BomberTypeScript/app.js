@@ -51,6 +51,7 @@ var Bomber;
         __extends(Game, _super);
         function Game() {
             _super.call(this, 800, 600, Phaser.AUTO, 'content', null);
+
             this.state.add('Boot', Bomber.Boot, false);
 
             //this.state.add('Preloader', Preloader, false);
@@ -77,6 +78,7 @@ var Bomber;
             this.game.load.tilemap("map", "http://localhost:3001/map.csv", null, Phaser.Tilemap.CSV);
             this.game.load.atlasJSONArray("bomberman", "http://localhost:3001/bomberman/bb.png", "http://localhost:3001/bomberman/bb_json.json");
             this.sock = io.connect("localhost:3000");
+            this.game.stage.disableVisibilityChange = true;
         };
 
         Level.prototype.create = function () {
@@ -89,6 +91,7 @@ var Bomber;
             this.sock.on("userMoved", this.handleUserMoved.bind(this));
             this.sock.on("userJoined", this.handleUserJoined.bind(this));
             this.sock.on("userQuit", this.handleUserQuit.bind(this));
+            this.sock.on("syncPosition", this.handleObjectSyncPosition.bind(this));
         };
 
         Level.prototype.update = function () {
@@ -126,11 +129,33 @@ var Bomber;
 
         Level.prototype.handleUserJoined = function (data) {
             console.log(data.name + " joined");
-            this.others[data.name] = new Bomber.Opponent(this.game, data.x, data.y, data.skinName, 1);
+            this.others[data.name] = new Bomber.Opponent(this.game, data.name, data.x, data.y, data.skinName, 1);
         };
         Level.prototype.handleUserQuit = function (data) {
             console.log(data + " quitted");
             this.others[data] = null;
+        };
+
+        Level.prototype.handleObjectSyncPosition = function (content) {
+            console.log(content.name + "sync position");
+            var synced = null;
+            if (this.joueur.name == content.name) {
+                synced = this.joueur;
+            } else {
+                if (this.others.hasOwnProperty(content.name)) {
+                    synced = this.others[content.name];
+                }
+            }
+
+            if (synced != null) {
+                synced.x = content.finishingX;
+                synced.y = content.finishingY;
+                if (content.typeMov == 4 /* Teleportation */) {
+                    synced.stop();
+                } else {
+                    synced.setAnim(content.typeMov);
+                }
+            }
         };
         return Level;
     })(Phaser.State);
@@ -146,24 +171,28 @@ var Bomber;
             this.speed = 2;
             this.name = name;
             this.currentMovement = null;
+            this.animations.add("walkTop", Phaser.Animation.generateFrameNames("walk_top", 1, 3, ".png"), 10, true);
+            this.animations.add("walkBot", Phaser.Animation.generateFrameNames("walk_bot", 1, 3, ".png"), 10, true);
+            this.animations.add("walkLeft", Phaser.Animation.generateFrameNames("walk_left", 1, 3, ".png"), 10, true);
+            this.animations.add("walkRight", Phaser.Animation.generateFrameNames("walk_right", 1, 3, ".png"), 10, true);
         }
         MovingObject.prototype.moveDown = function () {
-            this.y = this.y + 2;
+            this.y = this.y + this.speed;
             this.setAnim(0 /* Down */);
         };
 
         MovingObject.prototype.moveUp = function () {
-            this.y = this.y - 2;
+            this.y = this.y - this.speed;
             this.setAnim(1 /* Up */);
         };
 
         MovingObject.prototype.moveLeft = function () {
-            this.x = this.x - 2;
+            this.x = this.x - this.speed;
             this.setAnim(2 /* Left */);
         };
 
         MovingObject.prototype.moveRight = function () {
-            this.x = this.x + 2;
+            this.x = this.x + this.speed;
             this.setAnim(3 /* Right */);
         };
 
@@ -205,17 +234,34 @@ var Bomber;
 (function (Bomber) {
     var Opponent = (function (_super) {
         __extends(Opponent, _super);
-        function Opponent(game, x, y, key, frame) {
-            _super.call(this, game, x, y, key, frame);
-            this.name = name;
-            this.game.add.existing(this);
+        function Opponent(game, name, x, y, key, frame) {
+            _super.call(this, game, name, x, y, key, frame);
         }
         Opponent.prototype.handleMovement = function (content) {
-            this.x = content.finishingX;
-            this.y = content.finishingY;
+            if (content.typeMov == 0 /* Down */) {
+                this.moveDown();
+            } else {
+                if (content.typeMov == 2 /* Left */) {
+                    this.moveLeft();
+                } else {
+                    if (content.typeMov == 3 /* Right */) {
+                        this.moveRight();
+                    } else {
+                        if (content.typeMov == 1 /* Up */) {
+                            this.moveUp();
+                        } else {
+                            this.stop();
+                        }
+                    }
+                }
+            }
+
+            if (this.x != content.finishingX || this.y != content.finishingY) {
+                console.log("Error movement for " + this.name + " waited : " + content.finishingX + "," + content.finishingY + " | current : " + this.x + ", " + this.y);
+            }
         };
         return Opponent;
-    })(Phaser.Sprite);
+    })(Bomber.MovingObject);
     Bomber.Opponent = Opponent;
 })(Bomber || (Bomber = {}));
 var Bomber;
@@ -225,10 +271,7 @@ var Bomber;
         function Player(game, name, x, y, sock, key, frame) {
             _super.call(this, game, name, x, y, key, frame);
             this.sock = sock;
-            this.animations.add("walkTop", Phaser.Animation.generateFrameNames("walk_top", 1, 3, ".png"), 10, true);
-            this.animations.add("walkBot", Phaser.Animation.generateFrameNames("walk_bot", 1, 3, ".png"), 10, true);
-            this.animations.add("walkLeft", Phaser.Animation.generateFrameNames("walk_left", 1, 3, ".png"), 10, true);
-            this.animations.add("walkRight", Phaser.Animation.generateFrameNames("walk_right", 1, 3, ".png"), 10, true);
+
             this.sock.emit("created", this.name);
         }
         Player.prototype.update = function () {
@@ -267,6 +310,7 @@ var Bomber;
         MovementType[MovementType["Up"] = 1] = "Up";
         MovementType[MovementType["Left"] = 2] = "Left";
         MovementType[MovementType["Right"] = 3] = "Right";
+        MovementType[MovementType["Teleportation"] = 4] = "Teleportation";
     })(Bomber.MovementType || (Bomber.MovementType = {}));
     var MovementType = Bomber.MovementType;
 })(Bomber || (Bomber = {}));

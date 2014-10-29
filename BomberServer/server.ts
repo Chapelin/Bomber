@@ -38,6 +38,7 @@ function handlesocket(socket: io.Socket) {
         socketDico[name].socket = socket;
 
         socketDico[name].data = new UserJoinedData(data, { x: 70, y: 70 });
+        socket.emit("syncPosition", new MovementData(MovementType.Teleportation, { x: 70, y: 70 }, data));
         socket.broadcast.emit("userJoined", socketDico[name].data);
         //we notify the new player with the others
         for (var opponentName in socketDico) {
@@ -92,10 +93,11 @@ class MovementData {
 }
 
 
- enum MovementType {
+enum MovementType {
     Down = 0,
     Up,
     Left,
-    Right
+    Right,
+    Teleportation
 }
 

@@ -40,6 +40,7 @@
         Down = 0,
         Up,
         Left,
-        Right
+        Right,
+        Teleportation
     }
 } 

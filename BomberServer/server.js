@@ -37,6 +37,7 @@ function handlesocket(socket) {
         socketDico[name].socket = socket;
 
         socketDico[name].data = new UserJoinedData(data, { x: 70, y: 70 });
+        socket.emit("syncPosition", new MovementData(4 /* Teleportation */, { x: 70, y: 70 }, data));
         socket.broadcast.emit("userJoined", socketDico[name].data);
 
         for (var opponentName in socketDico) {
@@ -79,5 +80,6 @@ var MovementType;
     MovementType[MovementType["Up"] = 1] = "Up";
     MovementType[MovementType["Left"] = 2] = "Left";
     MovementType[MovementType["Right"] = 3] = "Right";
+    MovementType[MovementType["Teleportation"] = 4] = "Teleportation";
 })(MovementType || (MovementType = {}));
 //# sourceMappingURL=server.js.map
