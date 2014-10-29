@@ -29,8 +29,6 @@
             this.sock.on("userJoined", this.handleUserJoined.bind(this));
             this.sock.on("userQuit", this.handleUserQuit.bind(this));
             this.sock.on("syncPosition", this.handleObjectSyncPosition.bind(this));
-
-
         }
 
         update() {
@@ -48,7 +46,7 @@
                     } else {
                         if (this.cursors.up.isDown) {
                             this.joueur.moveUp();
-                            this.sendMove(MovementType.Down);
+                            this.sendMove(MovementType.Up);
                         } else {
                             this.joueur.stop();
                         }
@@ -88,7 +86,7 @@
 
             if (synced !=null) {
                 synced.x = content.finishingX;
-                synced .y = content.finishingY;
+                synced.y = content.finishingY;
                 if (content.typeMov == MovementType.Teleportation) {
                     synced.stop();
                 } else {

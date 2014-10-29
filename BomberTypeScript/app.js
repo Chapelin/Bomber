@@ -109,7 +109,7 @@ var Bomber;
                     } else {
                         if (this.cursors.up.isDown) {
                             this.joueur.moveUp();
-                            this.sendMove(0 /* Down */);
+                            this.sendMove(1 /* Up */);
                         } else {
                             this.joueur.stop();
                         }
@@ -259,6 +259,16 @@ var Bomber;
             if (this.x != content.finishingX || this.y != content.finishingY) {
                 console.log("Error movement for " + this.name + " waited : " + content.finishingX + "," + content.finishingY + " | current : " + this.x + ", " + this.y);
             }
+        };
+
+        Opponent.prototype.moveDown = function () {
+            console.log("Opponent movedown : ");
+            _super.prototype.moveDown.call(this);
+        };
+
+        Opponent.prototype.moveUp = function () {
+            console.log("Opponent moveup : ");
+            _super.prototype.moveUp.call(this);
         };
         return Opponent;
     })(Bomber.MovingObject);

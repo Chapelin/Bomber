@@ -30,5 +30,16 @@
                 console.log("Error movement for " + this.name + " waited : " + content.finishingX + "," + content.finishingY + " | current : " + this.x + ", " + this.y);
             }
         }
+
+        public moveDown() {
+            console.log("Opponent movedown : ");
+            super.moveDown();
+        }
+
+        public moveUp() {
+            console.log("Opponent moveup : ");
+            super.moveUp();
+        }
     }
+
 } 
