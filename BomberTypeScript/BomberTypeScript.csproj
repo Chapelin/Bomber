@@ -19,7 +19,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include="app.css" />
-    <Content Include="app.js" />
     <Content Include="index.html" />
     <Content Include="phaser-logo-small.png" />
     <Content Include="phaser.js" />
@@ -32,6 +31,7 @@
     <TypeScriptCompile Include="Boot.ts" />
     <TypeScriptCompile Include="game.ts" />
     <TypeScriptCompile Include="Level.ts" />
+    <TypeScriptCompile Include="MovingObject.ts" />
     <TypeScriptCompile Include="Opponent.ts" />
     <TypeScriptCompile Include="phaser.d.ts" />
     <TypeScriptCompile Include="Player.ts" />

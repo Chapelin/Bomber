@@ -121,7 +121,7 @@ var Bomber;
 
         Level.prototype.handleUserMoved = function (data) {
             console.log(data.name + " Moved");
-            this.others[data.name].HandleMovement(data);
+            this.others[data.name].handleMovement(data);
         };
 
         Level.prototype.handleUserJoined = function (data) {
@@ -138,6 +138,21 @@ var Bomber;
 })(Bomber || (Bomber = {}));
 var Bomber;
 (function (Bomber) {
+    var MovingObject = (function (_super) {
+        __extends(MovingObject, _super);
+        function MovingObject(game, name, x, y, key, frame) {
+            _super.call(this, game, x, y, key, frame);
+            this.game.add.existing(this);
+            this.speed = 2;
+            this.name = name;
+            this.currentMovement = null;
+        }
+        return MovingObject;
+    })(Phaser.Sprite);
+    Bomber.MovingObject = MovingObject;
+})(Bomber || (Bomber = {}));
+var Bomber;
+(function (Bomber) {
     var Opponent = (function (_super) {
         __extends(Opponent, _super);
         function Opponent(game, x, y, key, frame) {
@@ -145,7 +160,7 @@ var Bomber;
             this.name = name;
             this.game.add.existing(this);
         }
-        Opponent.prototype.HandleMovement = function (content) {
+        Opponent.prototype.handleMovement = function (content) {
             this.x = content.finishingX;
             this.y = content.finishingY;
         };
@@ -158,16 +173,13 @@ var Bomber;
     var Player = (function (_super) {
         __extends(Player, _super);
         function Player(game, name, x, y, sock, key, frame) {
-            _super.call(this, game, x, y, key, frame);
+            _super.call(this, game, name, x, y, key, frame);
             this.sock = sock;
-            this.name = name;
-            this.game.add.existing(this);
             this.animations.add("walkTop", Phaser.Animation.generateFrameNames("walk_top", 1, 3, ".png"), 10, true);
             this.animations.add("walkBot", Phaser.Animation.generateFrameNames("walk_bot", 1, 3, ".png"), 10, true);
             this.animations.add("walkLeft", Phaser.Animation.generateFrameNames("walk_left", 1, 3, ".png"), 10, true);
             this.animations.add("walkRight", Phaser.Animation.generateFrameNames("walk_right", 1, 3, ".png"), 10, true);
             this.sock.emit("created", this.name);
-            this.currentMovement = null;
         }
         Player.prototype.update = function () {
         };
@@ -223,7 +235,7 @@ var Bomber;
             }
         };
         return Player;
-    })(Phaser.Sprite);
+    })(Bomber.MovingObject);
     Bomber.Player = Player;
 })(Bomber || (Bomber = {}));
 var Bomber;

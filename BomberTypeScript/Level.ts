@@ -62,7 +62,7 @@
 
         handleUserMoved(data: MovementData) {
             console.log(data.name + " Moved");
-            this.others[data.name].HandleMovement(data);
+            this.others[data.name].handleMovement(data);
         }
 
         handleUserJoined(data: UserJoinedData) {
