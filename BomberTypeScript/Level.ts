@@ -6,14 +6,14 @@
         sock: io.Socket;
         joueur: Player;
         cursors: Phaser.CursorKeys;
-        others: { [id: string]: Opponent};
+        others: { [id: string]: Opponent };
 
         preload() {
             this.others = {};
             this.game.load.crossOrigin = "Anonymous";
             this.game.load.image("decors", "http://localhost:3001/sol.png");
             this.game.load.tilemap("map", "http://localhost:3001/map.csv", null, Phaser.Tilemap.CSV);
-            this.game.load.atlasJSONArray("bomberman","http://localhost:3001/bomberman/bb.png","http://localhost:3001/bomberman/bb_json.json");
+            this.game.load.atlasJSONArray("bomberman", "http://localhost:3001/bomberman/bb.png", "http://localhost:3001/bomberman/bb_json.json");
             this.sock = io.connect("localhost:3000");
             this.game.stage.disableVisibilityChange = true;
         }
@@ -23,12 +23,13 @@
             this.map.addTilesetImage('decors');
             var layer = this.map.createLayer(0);
             layer.resizeWorld();
-            this.joueur = new Player(this.game, "toto"+Date.now(), 15, 15, this.sock, "bomberman", 1);
+            this.joueur = new Player(this.game, "toto" + Date.now(), 15, 15, this.sock, "bomberman", 1);
             this.cursors = this.game.input.keyboard.createCursorKeys();
             this.sock.on("userMoved", this.handleUserMoved.bind(this));
             this.sock.on("userJoined", this.handleUserJoined.bind(this));
             this.sock.on("userQuit", this.handleUserQuit.bind(this));
             this.sock.on("syncPosition", this.handleObjectSyncPosition.bind(this));
+            this.sock.on("stoppedMovement", this.handleStoppedMovement.bind(this));
         }
 
         update() {
@@ -48,7 +49,9 @@
                             this.joueur.moveUp();
                             this.sendMove(MovementType.Up);
                         } else {
-                            this.joueur.stop();
+                            if (this.joueur.isMoving) {
+                                this.joueur.stop();
+                            }
                         }
                     }
                 }
@@ -66,11 +69,15 @@
 
         handleUserJoined(data: UserJoinedData) {
             console.log(data.name + " joined");
-            this.others[data.name] = new Opponent(this.game,data.name, data.x, data.y, data.skinName, 1);
+            this.others[data.name] = new Opponent(this.game, data.name, data.x, data.y, data.skinName, 1);
         }
         handleUserQuit(data: string) {
             console.log(data + " quitted");
             this.others[data] = null;
+        }
+        handleStoppedMovement(data: StopData) {
+            console.log(data.name + " stopped");
+            this.others[data.name].stop();
         }
 
         handleObjectSyncPosition(content: MovementData) {
@@ -84,15 +91,15 @@
                 }
             }
 
-            if (synced !=null) {
+            if (synced != null) {
                 synced.x = content.finishingX;
                 synced.y = content.finishingY;
                 if (content.typeMov == MovementType.Teleportation) {
                     synced.stop();
                 } else {
                     synced.setAnim(content.typeMov);
-                    }
                 }
+            }
         }
     }
 

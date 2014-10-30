@@ -16,9 +16,19 @@ function handlesocket(socket) {
     socket.on("created", handleCreation);
     socket.on("updated", handleUpdate);
     socket.on("move", handleMove);
+    socket.on("stoppedMovement", handleStop);
 
     function handleUpdate(data) {
         console.log("Updated : " + data);
+    }
+    function handleStop(data) {
+        console.log("Stopped : " + name);
+
+        //TODO : check positions ?
+        socketDico[name].data.x = data.x;
+        socketDico[name].data.y = data.y;
+        data.name = name;
+        socket.broadcast.emit("stoppedMovement", data);
     }
 
     function handleMove(data) {
@@ -27,6 +37,8 @@ function handlesocket(socket) {
 
         //the name handling is server side to avoid cheat
         data.name = name;
+        socketDico[name].data.x = data.finishingX;
+        socketDico[name].data.y = data.finishingY;
         socket.broadcast.emit("userMoved", data);
     }
 
@@ -82,4 +94,12 @@ var MovementType;
     MovementType[MovementType["Right"] = 3] = "Right";
     MovementType[MovementType["Teleportation"] = 4] = "Teleportation";
 })(MovementType || (MovementType = {}));
+
+var StopData = (function () {
+    function StopData(position) {
+        this.x = position.x;
+        this.y = position.y;
+    }
+    return StopData;
+})();
 //# sourceMappingURL=server.js.map

@@ -92,6 +92,7 @@ var Bomber;
             this.sock.on("userJoined", this.handleUserJoined.bind(this));
             this.sock.on("userQuit", this.handleUserQuit.bind(this));
             this.sock.on("syncPosition", this.handleObjectSyncPosition.bind(this));
+            this.sock.on("stoppedMovement", this.handleStoppedMovement.bind(this));
         };
 
         Level.prototype.update = function () {
@@ -111,7 +112,9 @@ var Bomber;
                             this.joueur.moveUp();
                             this.sendMove(1 /* Up */);
                         } else {
-                            this.joueur.stop();
+                            if (this.joueur.isMoving) {
+                                this.joueur.stop();
+                            }
                         }
                     }
                 }
@@ -134,6 +137,10 @@ var Bomber;
         Level.prototype.handleUserQuit = function (data) {
             console.log(data + " quitted");
             this.others[data] = null;
+        };
+        Level.prototype.handleStoppedMovement = function (data) {
+            console.log(data.name + " stopped");
+            this.others[data.name].stop();
         };
 
         Level.prototype.handleObjectSyncPosition = function (content) {
@@ -171,27 +178,32 @@ var Bomber;
             this.speed = 2;
             this.name = name;
             this.currentMovement = null;
+            this.isMoving = false;
             this.animations.add("walkTop", Phaser.Animation.generateFrameNames("walk_top", 1, 3, ".png"), 10, true);
             this.animations.add("walkBot", Phaser.Animation.generateFrameNames("walk_bot", 1, 3, ".png"), 10, true);
             this.animations.add("walkLeft", Phaser.Animation.generateFrameNames("walk_left", 1, 3, ".png"), 10, true);
             this.animations.add("walkRight", Phaser.Animation.generateFrameNames("walk_right", 1, 3, ".png"), 10, true);
         }
         MovingObject.prototype.moveDown = function () {
+            this.isMoving = true;
             this.y = this.y + this.speed;
             this.setAnim(0 /* Down */);
         };
 
         MovingObject.prototype.moveUp = function () {
+            this.isMoving = true;
             this.y = this.y - this.speed;
             this.setAnim(1 /* Up */);
         };
 
         MovingObject.prototype.moveLeft = function () {
+            this.isMoving = true;
             this.x = this.x - this.speed;
             this.setAnim(2 /* Left */);
         };
 
         MovingObject.prototype.moveRight = function () {
+            this.isMoving = true;
             this.x = this.x + this.speed;
             this.setAnim(3 /* Right */);
         };
@@ -220,6 +232,7 @@ var Bomber;
         };
 
         MovingObject.prototype.stop = function () {
+            this.isMoving = false;
             if (this.animations != null) {
                 this.animations.currentAnim.stop();
                 this.animations.currentAnim.frame = 2;
@@ -286,6 +299,11 @@ var Bomber;
         }
         Player.prototype.update = function () {
         };
+
+        Player.prototype.stop = function () {
+            _super.prototype.stop.call(this);
+            this.sock.emit("stoppedMovement", new Bomber.StopData({ x: this.x, y: this.y }));
+        };
         return Player;
     })(Bomber.MovingObject);
     Bomber.Player = Player;
@@ -314,6 +332,15 @@ var Bomber;
         return MovementData;
     })();
     Bomber.MovementData = MovementData;
+
+    var StopData = (function () {
+        function StopData(position) {
+            this.x = position.x;
+            this.y = position.y;
+        }
+        return StopData;
+    })();
+    Bomber.StopData = StopData;
 
     (function (MovementType) {
         MovementType[MovementType["Down"] = 0] = "Down";
