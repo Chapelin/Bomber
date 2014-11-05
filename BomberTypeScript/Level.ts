@@ -7,7 +7,7 @@
         joueur: Player;
         cursors: Phaser.CursorKeys;
         others: { [id: string]: Opponent };
-        layer : Phaser.TilemapLayer;
+        layer: Phaser.TilemapLayer;
 
         preload() {
             this.others = {};
@@ -21,8 +21,8 @@
 
         create() {
             this.prepareMap();
-           
-            
+
+
 
             this.joueur = new Player(this.game, "toto" + Date.now(), 15, 15, this.sock, "bomberman", 1);
             this.cursors = this.game.input.keyboard.createCursorKeys();
@@ -49,10 +49,10 @@
         }
 
         update() {
-            if (this.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
-                this.game.physics.arcade.collide(this.joueur, this.layer, this.callBackCollide.bind(this));
-            }
-            this.joueur.body.velocity.set(0);
+
+            
+
+            
 
             if (this.cursors.down.isDown) {
                 this.joueur.moveDown();
@@ -77,11 +77,11 @@
                     }
                 }
             }
-            
-           
+            this.game.physics.arcade.collide(this.joueur, this.layer, this.callBackCollide.bind(this));
+
         }
 
-        callBackCollide() : boolean {
+        callBackCollide(): boolean {
             this.game.physics.arcade.collide(this.joueur, this.layer);
             console.log("collided");
             return true;

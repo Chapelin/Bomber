@@ -74,6 +74,7 @@
 
         stop() {
             this.isMoving = false;
+            this.body.velocity.set(0);
             if (this.animations != null) {
                 this.animations.currentAnim.stop();
                 this.animations.currentAnim.frame = 2;

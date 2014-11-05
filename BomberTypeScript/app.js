@@ -109,11 +109,6 @@ var Bomber;
         };
 
         Level.prototype.update = function () {
-            if (this.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
-                this.game.physics.arcade.collide(this.joueur, this.layer, this.callBackCollide.bind(this));
-            }
-            this.joueur.body.velocity.set(0);
-
             if (this.cursors.down.isDown) {
                 this.joueur.moveDown();
                 this.sendMove(0 /* Down */);
@@ -137,6 +132,7 @@ var Bomber;
                     }
                 }
             }
+            this.game.physics.arcade.collide(this.joueur, this.layer, this.callBackCollide.bind(this));
         };
 
         Level.prototype.callBackCollide = function () {
@@ -265,6 +261,7 @@ var Bomber;
 
         MovingObject.prototype.stop = function () {
             this.isMoving = false;
+            this.body.velocity.set(0);
             if (this.animations != null) {
                 this.animations.currentAnim.stop();
                 this.animations.currentAnim.frame = 2;
@@ -281,6 +278,7 @@ var Bomber;
         __extends(Opponent, _super);
         function Opponent(game, name, x, y, key, frame) {
             _super.call(this, game, name, x, y, key, frame);
+            this.game.physics.enable(this, Phaser.Physics.ARCADE);
         }
         Opponent.prototype.handleMovement = function (content) {
             if (content.typeMov == 0 /* Down */) {

@@ -3,7 +3,7 @@
         
         constructor(game: Phaser.Game,name : string,  x: number, y: number,  key?: any, frame?: any) {
             super(game, name, x, y, key, frame);
-            
+            this.game.physics.enable(this, Phaser.Physics.ARCADE);
         }
 
 
