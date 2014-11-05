@@ -7,6 +7,7 @@
         joueur: Player;
         cursors: Phaser.CursorKeys;
         others: { [id: string]: Opponent };
+        layer : Phaser.TilemapLayer;
 
         preload() {
             this.others = {};
@@ -19,12 +20,13 @@
         }
 
         create() {
-            this.map = this.game.add.tilemap("map", 16, 16);
-            this.map.addTilesetImage('decors');
-            var layer = this.map.createLayer(0);
-            layer.resizeWorld();
+            this.prepareMap();
+           
+            
+
             this.joueur = new Player(this.game, "toto" + Date.now(), 15, 15, this.sock, "bomberman", 1);
             this.cursors = this.game.input.keyboard.createCursorKeys();
+            this.preparePhysics();
             this.sock.on("userMoved", this.handleUserMoved.bind(this));
             this.sock.on("userJoined", this.handleUserJoined.bind(this));
             this.sock.on("userQuit", this.handleUserQuit.bind(this));
@@ -32,7 +34,26 @@
             this.sock.on("stoppedMovement", this.handleStoppedMovement.bind(this));
         }
 
+        preparePhysics() {
+            this.map.setCollision(1);
+            this.game.physics.enable(this.joueur, Phaser.Physics.ARCADE);
+            this.joueur.body.setSize(this.joueur.width, this.joueur.height);
+            this.layer.debug = true;
+        }
+
+        prepareMap() {
+            this.map = this.game.add.tilemap("map", 16, 16);
+            this.map.addTilesetImage('decors');
+            this.layer = this.map.createLayer(0);
+            this.layer.resizeWorld();
+        }
+
         update() {
+            if (this.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
+                this.game.physics.arcade.collide(this.joueur, this.layer, this.callBackCollide.bind(this));
+            }
+            this.joueur.body.velocity.set(0);
+
             if (this.cursors.down.isDown) {
                 this.joueur.moveDown();
                 this.sendMove(MovementType.Down);
@@ -56,6 +77,14 @@
                     }
                 }
             }
+            
+           
+        }
+
+        callBackCollide() : boolean {
+            this.game.physics.arcade.collide(this.joueur, this.layer);
+            console.log("collided");
+            return true;
         }
 
         sendMove(type: MovementType) {

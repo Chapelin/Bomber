@@ -82,12 +82,11 @@ var Bomber;
         };
 
         Level.prototype.create = function () {
-            this.map = this.game.add.tilemap("map", 16, 16);
-            this.map.addTilesetImage('decors');
-            var layer = this.map.createLayer(0);
-            layer.resizeWorld();
+            this.prepareMap();
+
             this.joueur = new Bomber.Player(this.game, "toto" + Date.now(), 15, 15, this.sock, "bomberman", 1);
             this.cursors = this.game.input.keyboard.createCursorKeys();
+            this.preparePhysics();
             this.sock.on("userMoved", this.handleUserMoved.bind(this));
             this.sock.on("userJoined", this.handleUserJoined.bind(this));
             this.sock.on("userQuit", this.handleUserQuit.bind(this));
@@ -95,7 +94,26 @@ var Bomber;
             this.sock.on("stoppedMovement", this.handleStoppedMovement.bind(this));
         };
 
+        Level.prototype.preparePhysics = function () {
+            this.map.setCollision(1);
+            this.game.physics.enable(this.joueur, Phaser.Physics.ARCADE);
+            this.joueur.body.setSize(this.joueur.width, this.joueur.height);
+            this.layer.debug = true;
+        };
+
+        Level.prototype.prepareMap = function () {
+            this.map = this.game.add.tilemap("map", 16, 16);
+            this.map.addTilesetImage('decors');
+            this.layer = this.map.createLayer(0);
+            this.layer.resizeWorld();
+        };
+
         Level.prototype.update = function () {
+            if (this.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
+                this.game.physics.arcade.collide(this.joueur, this.layer, this.callBackCollide.bind(this));
+            }
+            this.joueur.body.velocity.set(0);
+
             if (this.cursors.down.isDown) {
                 this.joueur.moveDown();
                 this.sendMove(0 /* Down */);
@@ -119,6 +137,12 @@ var Bomber;
                     }
                 }
             }
+        };
+
+        Level.prototype.callBackCollide = function () {
+            this.game.physics.arcade.collide(this.joueur, this.layer);
+            console.log("collided");
+            return true;
         };
 
         Level.prototype.sendMove = function (type) {
@@ -175,7 +199,7 @@ var Bomber;
         function MovingObject(game, name, x, y, key, frame) {
             _super.call(this, game, x, y, key, frame);
             this.game.add.existing(this);
-            this.speed = 2;
+            this.velocityOfObject = 120;
             this.name = name;
             this.currentMovement = null;
             this.isMoving = false;
@@ -184,27 +208,35 @@ var Bomber;
             this.animations.add("walkLeft", Phaser.Animation.generateFrameNames("walk_left", 1, 3, ".png"), 10, true);
             this.animations.add("walkRight", Phaser.Animation.generateFrameNames("walk_right", 1, 3, ".png"), 10, true);
         }
+        Object.defineProperty(MovingObject.prototype, "speedPerFrame", {
+            get: function () {
+                return this.velocityOfObject / 60;
+            },
+            enumerable: true,
+            configurable: true
+        });
+
         MovingObject.prototype.moveDown = function () {
             this.isMoving = true;
-            this.y = this.y + this.speed;
+            this.body.velocity = new Phaser.Point(0, this.velocityOfObject);
             this.setAnim(0 /* Down */);
         };
 
         MovingObject.prototype.moveUp = function () {
             this.isMoving = true;
-            this.y = this.y - this.speed;
+            this.body.velocity = new Phaser.Point(0, -this.velocityOfObject);
             this.setAnim(1 /* Up */);
         };
 
         MovingObject.prototype.moveLeft = function () {
             this.isMoving = true;
-            this.x = this.x - this.speed;
+            this.body.velocity = new Phaser.Point(-this.velocityOfObject, 0);
             this.setAnim(2 /* Left */);
         };
 
         MovingObject.prototype.moveRight = function () {
             this.isMoving = true;
-            this.x = this.x + this.speed;
+            this.body.velocity = new Phaser.Point(this.velocityOfObject, 0);
             this.setAnim(3 /* Right */);
         };
 

@@ -2,15 +2,16 @@
 
     export class MovingObject extends Phaser.Sprite {
 
-        speed: number;
+        velocityOfObject: number;
         name: string;
         currentMovement: MovementType;
-        isMoving : boolean
+        isMoving: boolean
+        
 
         constructor(game: Phaser.Game, name: string, x: number, y: number, key?: any, frame?: any) {
             super(game, x, y, key, frame);
             this.game.add.existing(this);
-            this.speed = 2;
+            this.velocityOfObject = 120;
             this.name = name;
             this.currentMovement = null;
             this.isMoving = false;
@@ -20,27 +21,31 @@
             this.animations.add("walkRight", Phaser.Animation.generateFrameNames("walk_right", 1, 3, ".png"), 10, true);
         }
 
+        get speedPerFrame() : number {
+            return this.velocityOfObject / 60; // fps
+        }
+
         moveDown() {
             this.isMoving = true;
-            this.y = this.y + this.speed;
+            this.body.velocity = new Phaser.Point(0, this.velocityOfObject);
             this.setAnim(MovementType.Down);
         }
 
         moveUp() {
             this.isMoving = true;
-            this.y = this.y - this.speed;
+            this.body.velocity = new Phaser.Point(0, -this.velocityOfObject);
             this.setAnim(MovementType.Up);
         }
 
         moveLeft() {
             this.isMoving = true;
-            this.x = this.x - this.speed;
+            this.body.velocity = new Phaser.Point(-this.velocityOfObject,0 );
             this.setAnim(MovementType.Left);
         }
 
         moveRight() {
             this.isMoving = true;
-            this.x = this.x + this.speed;
+            this.body.velocity = new Phaser.Point(this.velocityOfObject, 0);
             this.setAnim(MovementType.Right);
         }
 
