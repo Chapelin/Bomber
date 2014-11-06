@@ -92,6 +92,7 @@ var Bomber;
             this.sock.on("userQuit", this.handleUserQuit.bind(this));
             this.sock.on("syncPosition", this.handleObjectSyncPosition.bind(this));
             this.sock.on("stoppedMovement", this.handleStoppedMovement.bind(this));
+            this.sock.on("OpponentCollided", this.handleCollided.bind(this));
         };
 
         Level.prototype.preparePhysics = function () {
@@ -135,9 +136,15 @@ var Bomber;
             this.game.physics.arcade.collide(this.joueur, this.layer, this.callBackCollide.bind(this));
         };
 
+        Level.prototype.handleCollided = function (data) {
+            console.log(data.name + " collided");
+            this.others[data.name].position = new Phaser.Point(data.finishingX, data.finishingY);
+        };
+
         Level.prototype.callBackCollide = function () {
             this.game.physics.arcade.collide(this.joueur, this.layer);
             console.log("collided");
+            this.sendCollided(this.joueur.position);
             return true;
         };
 
@@ -183,6 +190,10 @@ var Bomber;
                     synced.setAnim(content.typeMov);
                 }
             }
+        };
+
+        Level.prototype.sendCollided = function (position) {
+            this.sock.emit("collided", new Bomber.MovementData(5 /* Collided */, position, this.joueur.name));
         };
         return Level;
     })(Phaser.State);
@@ -378,6 +389,7 @@ var Bomber;
         MovementType[MovementType["Left"] = 2] = "Left";
         MovementType[MovementType["Right"] = 3] = "Right";
         MovementType[MovementType["Teleportation"] = 4] = "Teleportation";
+        MovementType[MovementType["Collided"] = 5] = "Collided";
     })(Bomber.MovementType || (Bomber.MovementType = {}));
     var MovementType = Bomber.MovementType;
 })(Bomber || (Bomber = {}));

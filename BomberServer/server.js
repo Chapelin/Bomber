@@ -14,13 +14,18 @@ function handlesocket(socket) {
     console.log("Connected");
     var name = "";
     socket.on("created", handleCreation);
-    socket.on("updated", handleUpdate);
     socket.on("move", handleMove);
     socket.on("stoppedMovement", handleStop);
+    socket.on("collided", handleCollided);
 
-    function handleUpdate(data) {
-        console.log("Updated : " + data);
+    function handleCollided(data) {
+        console.log("Collided", name);
+        socketDico[name].data.x = data.finishingX;
+        socketDico[name].data.y = data.finishingY;
+        data.name = name;
+        socket.broadcast.emit("OpponentCollided", data);
     }
+
     function handleStop(data) {
         console.log("Stopped : " + name);
 
@@ -93,6 +98,7 @@ var MovementType;
     MovementType[MovementType["Left"] = 2] = "Left";
     MovementType[MovementType["Right"] = 3] = "Right";
     MovementType[MovementType["Teleportation"] = 4] = "Teleportation";
+    MovementType[MovementType["Collided"] = 5] = "Collided";
 })(MovementType || (MovementType = {}));
 
 var StopData = (function () {

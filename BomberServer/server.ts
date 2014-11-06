@@ -15,14 +15,19 @@ function handlesocket(socket: io.Socket) {
     console.log("Connected");
     var name = "";
     socket.on("created", handleCreation);
-    socket.on("updated", handleUpdate);
     socket.on("move", handleMove);
     socket.on("stoppedMovement", handleStop);
+    socket.on("collided", handleCollided);
 
-    function handleUpdate(data: any[]) {
-        console.log("Updated : " + data);
-
+    function handleCollided(data: MovementData) {
+        console.log("Collided", name);
+        socketDico[name].data.x = data.finishingX;
+        socketDico[name].data.y = data.finishingY;
+        data.name = name;
+        socket.broadcast.emit("OpponentCollided", data);
     }
+
+   
     function handleStop(data: StopData) {
         console.log("Stopped : " + name);
         //TODO : check positions ?
@@ -109,7 +114,8 @@ enum MovementType {
     Up,
     Left,
     Right,
-    Teleportation
+    Teleportation,
+    Collided
 }
 
 class StopData {

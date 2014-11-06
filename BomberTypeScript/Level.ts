@@ -32,6 +32,7 @@
             this.sock.on("userQuit", this.handleUserQuit.bind(this));
             this.sock.on("syncPosition", this.handleObjectSyncPosition.bind(this));
             this.sock.on("stoppedMovement", this.handleStoppedMovement.bind(this));
+            this.sock.on("OpponentCollided", this.handleCollided.bind(this));
         }
 
         preparePhysics() {
@@ -49,10 +50,6 @@
         }
 
         update() {
-
-            
-
-            
 
             if (this.cursors.down.isDown) {
                 this.joueur.moveDown();
@@ -81,9 +78,15 @@
 
         }
 
+        handleCollided(data: MovementData) {
+            console.log(data.name + " collided");
+            this.others[data.name].position = new Phaser.Point(data.finishingX, data.finishingY);
+        }
+
         callBackCollide(): boolean {
             this.game.physics.arcade.collide(this.joueur, this.layer);
             console.log("collided");
+            this.sendCollided(this.joueur.position);
             return true;
         }
 
@@ -129,6 +132,10 @@
                     synced.setAnim(content.typeMov);
                 }
             }
+        }
+
+        sendCollided(position) {
+            this.sock.emit("collided", new MovementData(MovementType.Collided, position, this.joueur.name));
         }
     }
 

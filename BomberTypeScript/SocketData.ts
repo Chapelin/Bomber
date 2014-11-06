@@ -52,6 +52,7 @@
         Up,
         Left,
         Right,
-        Teleportation
+        Teleportation,
+        Collided
     }
 } 
