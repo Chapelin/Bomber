@@ -187,7 +187,8 @@ var Bomber;
                 if (content.typeMov == 4 /* Teleportation */) {
                     synced.stop();
                 } else {
-                    synced.setAnim(content.typeMov);
+                    if (synced.currentMovement != content.typeMov)
+                        synced.setAnim(content.typeMov);
                 }
             }
         };

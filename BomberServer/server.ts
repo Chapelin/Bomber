@@ -14,6 +14,7 @@ var socketDico: { [id: string]: InfoPlayer } = {};
 function handlesocket(socket: io.Socket) {
     console.log("Connected");
     var name = "";
+    var cpt = new CounterTillSync(socket, 60, syncPosition);
     socket.on("created", handleCreation);
     socket.on("move", handleMove);
     socket.on("stoppedMovement", handleStop);
@@ -25,9 +26,15 @@ function handlesocket(socket: io.Socket) {
         socketDico[name].data.y = data.finishingY;
         data.name = name;
         socket.broadcast.emit("OpponentCollided", data);
+        cpt.addCpt();
     }
 
-   
+
+    function syncPosition() {
+        console.log("*********************Sync of " + name);
+        socket.broadcast.emit("syncPosition", new MovementData(null, { x: socketDico[name].data.x, y: socketDico[name].data.x }, name));
+    }
+
     function handleStop(data: StopData) {
         console.log("Stopped : " + name);
         //TODO : check positions ?
@@ -35,6 +42,7 @@ function handlesocket(socket: io.Socket) {
         socketDico[name].data.y = data.y;
         data.name = name;
         socket.broadcast.emit("stoppedMovement", data);
+        cpt.addCpt();
 
     }
 
@@ -46,6 +54,7 @@ function handlesocket(socket: io.Socket) {
         socketDico[name].data.x = data.finishingX;
         socketDico[name].data.y = data.finishingY;
         socket.broadcast.emit("userMoved", data);
+        cpt.addCpt();
     }
 
     function handleCreation(data: string) {
@@ -63,6 +72,31 @@ function handlesocket(socket: io.Socket) {
                 socket.emit("userJoined", socketDico[opponentName].data);
         }
     }
+}
+
+
+class CounterTillSync {
+    cpt: number;
+    socket: io.Socket;
+    toSync: number;
+    callBack: Function;
+
+    constructor(sock: io.Socket, cptToSync: number, tocall: Function) {
+        this.cpt = 0;
+        this.toSync = cptToSync;
+        this.socket = sock;
+        this.callBack = tocall;
+    }
+
+    addCpt() {
+        this.cpt++;
+        if (this.cpt > this.toSync) {
+            this.callBack();
+            this.cpt = 0;
+        }
+
+    }
+
 }
 
 class InfoPlayer {

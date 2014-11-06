@@ -129,7 +129,8 @@
                 if (content.typeMov == MovementType.Teleportation) {
                     synced.stop();
                 } else {
-                    synced.setAnim(content.typeMov);
+                    if(synced.currentMovement != content.typeMov)
+                        synced.setAnim(content.typeMov);
                 }
             }
         }
