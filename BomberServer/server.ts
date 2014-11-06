@@ -31,8 +31,8 @@ function handlesocket(socket: io.Socket) {
 
 
     function syncPosition() {
-        console.log("*********************Sync of " + name);
-        socket.broadcast.emit("syncPosition", new MovementData(null, { x: socketDico[name].data.x, y: socketDico[name].data.x }, name));
+        console.log("Sync of " + name);
+        socket.broadcast.emit("syncPosition", new MovementData(null, { x: socketDico[name].data.x, y: socketDico[name].data.y }, name));
     }
 
     function handleStop(data: StopData) {
