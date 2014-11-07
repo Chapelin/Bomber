@@ -29,6 +29,7 @@
   <ItemGroup>
     <TypeScriptCompile Include="app.ts" />
     <TypeScriptCompile Include="Boot.ts" />
+    <TypeScriptCompile Include="Communication.ts" />
     <TypeScriptCompile Include="game.ts" />
     <TypeScriptCompile Include="Level.ts" />
     <TypeScriptCompile Include="MovingObject.ts" />

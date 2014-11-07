@@ -47,6 +47,61 @@ var Bomber;
 })(Bomber || (Bomber = {}));
 var Bomber;
 (function (Bomber) {
+    var BaseSocketWrapper = (function () {
+        function BaseSocketWrapper(socket) {
+            this.socket = socket;
+        }
+        BaseSocketWrapper.prototype.on = function (eventName, callBack) {
+            this.socket.on(eventName, callBack);
+        };
+
+        BaseSocketWrapper.prototype.emit = function (evenement, data) {
+            this.socket.emit(evenement, data);
+        };
+        return BaseSocketWrapper;
+    })();
+    Bomber.BaseSocketWrapper = BaseSocketWrapper;
+
+    var ClientSocketWrapper = (function (_super) {
+        __extends(ClientSocketWrapper, _super);
+        function ClientSocketWrapper(sock) {
+            _super.call(this, sock);
+        }
+        ClientSocketWrapper.prototype.on = function (eventName, callBack) {
+            //TODO : potential interceptor for localTimestamp data
+            var newCallback = function (data) {
+                return callBack(data);
+            };
+            _super.prototype.on.call(this, eventName, newCallback);
+        };
+
+        ClientSocketWrapper.prototype.emit = function (evenement, data) {
+            data.setTimeStampSended();
+            _super.prototype.emit.call(this, evenement, data);
+        };
+        return ClientSocketWrapper;
+    })(BaseSocketWrapper);
+    Bomber.ClientSocketWrapper = ClientSocketWrapper;
+
+    var ServeurSocketWrapper = (function (_super) {
+        __extends(ServeurSocketWrapper, _super);
+        function ServeurSocketWrapper() {
+            _super.apply(this, arguments);
+        }
+        //we timeStamp the recieving
+        ServeurSocketWrapper.prototype.on = function (eventName, callBack) {
+            var newCallback = function (data) {
+                data.setTimeStampServerReceived();
+                callBack(data);
+            };
+            _super.prototype.on.call(this, eventName, newCallback);
+        };
+        return ServeurSocketWrapper;
+    })(BaseSocketWrapper);
+    Bomber.ServeurSocketWrapper = ServeurSocketWrapper;
+})(Bomber || (Bomber = {}));
+var Bomber;
+(function (Bomber) {
     var Game = (function (_super) {
         __extends(Game, _super);
         function Game() {
@@ -352,36 +407,59 @@ var Bomber;
 })(Bomber || (Bomber = {}));
 var Bomber;
 (function (Bomber) {
-    var UserJoinedData = (function () {
+    var BaseData = (function () {
+        function BaseData() {
+            this.timeStampCreated = new Date().getTime();
+        }
+        BaseData.prototype.setTimeStampSended = function () {
+            this.timeStampSended = new Date().getTime();
+        };
+        BaseData.prototype.setTimeStampServerReceived = function () {
+            this.timeStampServerReceived = new Date().getTime();
+        };
+        BaseData.prototype.setTimeStampServerBroadcasted = function () {
+            this.timeStampServerBroadcasted = new Date().getTime();
+        };
+        return BaseData;
+    })();
+    Bomber.BaseData = BaseData;
+
+    var UserJoinedData = (function (_super) {
+        __extends(UserJoinedData, _super);
         function UserJoinedData(n, pos, skin) {
             if (typeof skin === "undefined") { skin = "bomberman"; }
+            _super.call(this);
             this.name = n;
             this.x = pos.x;
             this.y = pos.y;
             this.skinName = skin;
         }
         return UserJoinedData;
-    })();
+    })(BaseData);
     Bomber.UserJoinedData = UserJoinedData;
 
-    var MovementData = (function () {
+    var MovementData = (function (_super) {
+        __extends(MovementData, _super);
         function MovementData(typ, pos, name) {
+            _super.call(this);
             this.finishingX = pos.x;
             this.finishingY = pos.y;
             this.typeMov = typ;
             this.name = name;
         }
         return MovementData;
-    })();
+    })(BaseData);
     Bomber.MovementData = MovementData;
 
-    var StopData = (function () {
+    var StopData = (function (_super) {
+        __extends(StopData, _super);
         function StopData(position) {
+            _super.call(this);
             this.x = position.x;
             this.y = position.y;
         }
         return StopData;
-    })();
+    })(BaseData);
     Bomber.StopData = StopData;
 
     (function (MovementType) {
