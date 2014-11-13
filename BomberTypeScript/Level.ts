@@ -3,7 +3,7 @@
     export class Level extends Phaser.State {
 
         map: Phaser.Tilemap;
-        sock: io.Socket;
+        sockWrapper: ClientSocketWrapper;
         joueur: Player;
         cursors: Phaser.CursorKeys;
         others: { [id: string]: Opponent };
@@ -15,7 +15,8 @@
             this.game.load.image("decors", "http://localhost:3001/sol.png");
             this.game.load.tilemap("map", "http://localhost:3001/map.csv", null, Phaser.Tilemap.CSV);
             this.game.load.atlasJSONArray("bomberman", "http://localhost:3001/bomberman/bb.png", "http://localhost:3001/bomberman/bb_json.json");
-            this.sock = io.connect("localhost:3000");
+            var sock = io.connect("localhost:3000");
+            this.sockWrapper = new ClientSocketWrapper(sock);
             this.game.stage.disableVisibilityChange = true;
         }
 
@@ -24,15 +25,15 @@
 
 
 
-            this.joueur = new Player(this.game, "toto" + Date.now(), 15, 15, this.sock, "bomberman", 1);
+            this.joueur = new Player(this.game, "toto" + Date.now(), 15, 15, this.sockWrapper, "bomberman", 1);
             this.cursors = this.game.input.keyboard.createCursorKeys();
             this.preparePhysics();
-            this.sock.on("userMoved", this.handleUserMoved.bind(this));
-            this.sock.on("userJoined", this.handleUserJoined.bind(this));
-            this.sock.on("userQuit", this.handleUserQuit.bind(this));
-            this.sock.on("syncPosition", this.handleObjectSyncPosition.bind(this));
-            this.sock.on("stoppedMovement", this.handleStoppedMovement.bind(this));
-            this.sock.on("OpponentCollided", this.handleCollided.bind(this));
+            this.sockWrapper.on("userMoved", this.handleUserMoved.bind(this));
+            this.sockWrapper.on("userJoined", this.handleUserJoined.bind(this));
+            this.sockWrapper.on("userQuit", this.handleUserQuit.bind(this));
+            this.sockWrapper.on("syncPosition", this.handleObjectSyncPosition.bind(this));
+            this.sockWrapper.on("stoppedMovement", this.handleStoppedMovement.bind(this));
+            this.sockWrapper.on("OpponentCollided", this.handleCollided.bind(this));
         }
 
         preparePhysics() {
@@ -91,10 +92,11 @@
         }
 
         sendMove(type: MovementType) {
-            this.sock.emit("move", new MovementData(type, this.joueur, this.joueur.name));
+            this.sockWrapper.emit("move", new MovementData(type, this.joueur, this.joueur.name));
         }
 
         handleUserMoved(data: MovementData) {
+            console.log(data);
             console.log(data.name + " Moved");
             this.others[data.name].handleMovement(data);
         }
@@ -136,7 +138,7 @@
         }
 
         sendCollided(position) {
-            this.sock.emit("collided", new MovementData(MovementType.Collided, position, this.joueur.name));
+            this.sockWrapper.emit("collided", new MovementData(MovementType.Collided, position, this.joueur.name));
         }
     }
 

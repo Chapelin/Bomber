@@ -15,6 +15,16 @@
         public emit(evenement: string, data: BaseData) {
             this.socket.emit(evenement, data);
         }
+
+        public setTimeStampSended(data: BaseData) {
+            data.timeStampSended = new Date().getTime();
+        }
+        public setTimeStampServerReceived(data: BaseData) {
+            data.timeStampServerReceived = new Date().getTime();
+        }
+        public setTimeStampServerBroadcasted(data: BaseData) {
+            data.timeStampServerBroadcasted = new Date().getTime();
+        }
     }
 
     export class ClientSocketWrapper extends BaseSocketWrapper {
@@ -31,20 +41,9 @@
         }
 
         public emit(evenement: string, data: BaseData) {
-            data.setTimeStampSended();
+            super.setTimeStampSended(data);
             super.emit(evenement, data);
         }
     }
 
-    export class ServeurSocketWrapper extends BaseSocketWrapper {
-        
-        //we timeStamp the recieving
-        public on(eventName: string, callBack: Function) {
-            var newCallback: Function = (data: BaseData) => {
-                data.setTimeStampServerReceived();
-                callBack(data);
-            };
-            super.on(eventName, newCallback);
-        }
-    }
-} 
+}

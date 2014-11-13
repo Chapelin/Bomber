@@ -10,14 +10,13 @@
             this.timeStampCreated = new Date().getTime();
         }
 
-        public setTimeStampSended() {
-            this.timeStampSended = new Date().getTime();
-        }
-        public setTimeStampServerReceived() {
-            this.timeStampServerReceived = new Date().getTime();
-        }
-        public setTimeStampServerBroadcasted() {
-            this.timeStampServerBroadcasted = new Date().getTime();
+        public toString() : string {
+            var contenu = "";
+            contenu += "Created : " + this.timeStampCreated + "\r\n";
+            contenu += "Sended : " + this.timeStampSended + "\r\n";;
+            contenu += "Received by server : " + this.timeStampServerReceived + "\r\n";;
+            contenu += "Broadcasted by server : " + this.timeStampServerBroadcasted;
+            return contenu;
         }
     }
 
@@ -51,6 +50,15 @@
             this.name = name;
         }
 
+    }
+
+    export class CreatedData extends BaseData {
+        public name: string;
+
+        constructor(name: string) {
+            super();
+            this.name = name;
+        }
     }
 
     export class StopData extends BaseData {

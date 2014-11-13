@@ -58,6 +58,16 @@ var Bomber;
         BaseSocketWrapper.prototype.emit = function (evenement, data) {
             this.socket.emit(evenement, data);
         };
+
+        BaseSocketWrapper.prototype.setTimeStampSended = function (data) {
+            data.timeStampSended = new Date().getTime();
+        };
+        BaseSocketWrapper.prototype.setTimeStampServerReceived = function (data) {
+            data.timeStampServerReceived = new Date().getTime();
+        };
+        BaseSocketWrapper.prototype.setTimeStampServerBroadcasted = function (data) {
+            data.timeStampServerBroadcasted = new Date().getTime();
+        };
         return BaseSocketWrapper;
     })();
     Bomber.BaseSocketWrapper = BaseSocketWrapper;
@@ -76,29 +86,12 @@ var Bomber;
         };
 
         ClientSocketWrapper.prototype.emit = function (evenement, data) {
-            data.setTimeStampSended();
+            _super.prototype.setTimeStampSended.call(this, data);
             _super.prototype.emit.call(this, evenement, data);
         };
         return ClientSocketWrapper;
     })(BaseSocketWrapper);
     Bomber.ClientSocketWrapper = ClientSocketWrapper;
-
-    var ServeurSocketWrapper = (function (_super) {
-        __extends(ServeurSocketWrapper, _super);
-        function ServeurSocketWrapper() {
-            _super.apply(this, arguments);
-        }
-        //we timeStamp the recieving
-        ServeurSocketWrapper.prototype.on = function (eventName, callBack) {
-            var newCallback = function (data) {
-                data.setTimeStampServerReceived();
-                callBack(data);
-            };
-            _super.prototype.on.call(this, eventName, newCallback);
-        };
-        return ServeurSocketWrapper;
-    })(BaseSocketWrapper);
-    Bomber.ServeurSocketWrapper = ServeurSocketWrapper;
 })(Bomber || (Bomber = {}));
 var Bomber;
 (function (Bomber) {
@@ -132,22 +125,23 @@ var Bomber;
             this.game.load.image("decors", "http://localhost:3001/sol.png");
             this.game.load.tilemap("map", "http://localhost:3001/map.csv", null, Phaser.Tilemap.CSV);
             this.game.load.atlasJSONArray("bomberman", "http://localhost:3001/bomberman/bb.png", "http://localhost:3001/bomberman/bb_json.json");
-            this.sock = io.connect("localhost:3000");
+            var sock = io.connect("localhost:3000");
+            this.sockWrapper = new Bomber.ClientSocketWrapper(sock);
             this.game.stage.disableVisibilityChange = true;
         };
 
         Level.prototype.create = function () {
             this.prepareMap();
 
-            this.joueur = new Bomber.Player(this.game, "toto" + Date.now(), 15, 15, this.sock, "bomberman", 1);
+            this.joueur = new Bomber.Player(this.game, "toto" + Date.now(), 15, 15, this.sockWrapper, "bomberman", 1);
             this.cursors = this.game.input.keyboard.createCursorKeys();
             this.preparePhysics();
-            this.sock.on("userMoved", this.handleUserMoved.bind(this));
-            this.sock.on("userJoined", this.handleUserJoined.bind(this));
-            this.sock.on("userQuit", this.handleUserQuit.bind(this));
-            this.sock.on("syncPosition", this.handleObjectSyncPosition.bind(this));
-            this.sock.on("stoppedMovement", this.handleStoppedMovement.bind(this));
-            this.sock.on("OpponentCollided", this.handleCollided.bind(this));
+            this.sockWrapper.on("userMoved", this.handleUserMoved.bind(this));
+            this.sockWrapper.on("userJoined", this.handleUserJoined.bind(this));
+            this.sockWrapper.on("userQuit", this.handleUserQuit.bind(this));
+            this.sockWrapper.on("syncPosition", this.handleObjectSyncPosition.bind(this));
+            this.sockWrapper.on("stoppedMovement", this.handleStoppedMovement.bind(this));
+            this.sockWrapper.on("OpponentCollided", this.handleCollided.bind(this));
         };
 
         Level.prototype.preparePhysics = function () {
@@ -204,10 +198,11 @@ var Bomber;
         };
 
         Level.prototype.sendMove = function (type) {
-            this.sock.emit("move", new Bomber.MovementData(type, this.joueur, this.joueur.name));
+            this.sockWrapper.emit("move", new Bomber.MovementData(type, this.joueur, this.joueur.name));
         };
 
         Level.prototype.handleUserMoved = function (data) {
+            console.log(data);
             console.log(data.name + " Moved");
             this.others[data.name].handleMovement(data);
         };
@@ -249,7 +244,7 @@ var Bomber;
         };
 
         Level.prototype.sendCollided = function (position) {
-            this.sock.emit("collided", new Bomber.MovementData(5 /* Collided */, position, this.joueur.name));
+            this.sockWrapper.emit("collided", new Bomber.MovementData(5 /* Collided */, position, this.joueur.name));
         };
         return Level;
     })(Phaser.State);
@@ -392,7 +387,7 @@ var Bomber;
             _super.call(this, game, name, x, y, key, frame);
             this.sock = sock;
 
-            this.sock.emit("created", this.name);
+            this.sock.emit("created", new Bomber.CreatedData(this.name));
         }
         Player.prototype.update = function () {
         };
@@ -411,14 +406,15 @@ var Bomber;
         function BaseData() {
             this.timeStampCreated = new Date().getTime();
         }
-        BaseData.prototype.setTimeStampSended = function () {
-            this.timeStampSended = new Date().getTime();
-        };
-        BaseData.prototype.setTimeStampServerReceived = function () {
-            this.timeStampServerReceived = new Date().getTime();
-        };
-        BaseData.prototype.setTimeStampServerBroadcasted = function () {
-            this.timeStampServerBroadcasted = new Date().getTime();
+        BaseData.prototype.toString = function () {
+            var contenu = "";
+            contenu += "Created : " + this.timeStampCreated + "\r\n";
+            contenu += "Sended : " + this.timeStampSended + "\r\n";
+            ;
+            contenu += "Received by server : " + this.timeStampServerReceived + "\r\n";
+            ;
+            contenu += "Broadcasted by server : " + this.timeStampServerBroadcasted;
+            return contenu;
         };
         return BaseData;
     })();
@@ -450,6 +446,16 @@ var Bomber;
         return MovementData;
     })(BaseData);
     Bomber.MovementData = MovementData;
+
+    var CreatedData = (function (_super) {
+        __extends(CreatedData, _super);
+        function CreatedData(name) {
+            _super.call(this);
+            this.name = name;
+        }
+        return CreatedData;
+    })(BaseData);
+    Bomber.CreatedData = CreatedData;
 
     var StopData = (function (_super) {
         __extends(StopData, _super);

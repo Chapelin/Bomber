@@ -1,4 +1,10 @@
-﻿var http = require('http');
+﻿var __extends = this.__extends || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    __.prototype = b.prototype;
+    d.prototype = new __();
+};
+var http = require('http');
 var io = require("socket.io");
 var port = process.env.port || 1337;
 http.createServer(function (req, res) {
@@ -14,23 +20,24 @@ function handlesocket(socket) {
     console.log("Connected");
     var name = "";
     var cpt = new CounterTillSync(socket, 60, syncPosition);
-    socket.on("created", handleCreation);
-    socket.on("move", handleMove);
-    socket.on("stoppedMovement", handleStop);
-    socket.on("collided", handleCollided);
+    var socketWrapper = new ServeurSocketWrapper(socket);
+    socketWrapper.on("created", handleCreation);
+    socketWrapper.on("move", handleMove);
+    socketWrapper.on("stoppedMovement", handleStop);
+    socketWrapper.on("collided", handleCollided);
 
     function handleCollided(data) {
         console.log("Collided", name);
         socketDico[name].data.x = data.finishingX;
         socketDico[name].data.y = data.finishingY;
         data.name = name;
-        socket.broadcast.emit("OpponentCollided", data);
+        socketWrapper.broadcast("OpponentCollided", data);
         cpt.addCpt();
     }
 
     function syncPosition() {
         console.log("Sync of " + name);
-        socket.broadcast.emit("syncPosition", new MovementData(null, { x: socketDico[name].data.x, y: socketDico[name].data.y }, name));
+        socketWrapper.broadcast("syncPosition", new MovementData(null, { x: socketDico[name].data.x, y: socketDico[name].data.y }, name));
     }
 
     function handleStop(data) {
@@ -40,7 +47,7 @@ function handlesocket(socket) {
         socketDico[name].data.x = data.x;
         socketDico[name].data.y = data.y;
         data.name = name;
-        socket.broadcast.emit("stoppedMovement", data);
+        socketWrapper.broadcast("stoppedMovement", data);
         cpt.addCpt();
     }
 
@@ -52,19 +59,19 @@ function handlesocket(socket) {
         data.name = name;
         socketDico[name].data.x = data.finishingX;
         socketDico[name].data.y = data.finishingY;
-        socket.broadcast.emit("userMoved", data);
+        socketWrapper.broadcast("userMoved", data);
         cpt.addCpt();
     }
 
     function handleCreation(data) {
-        console.log("Data reçues en creation : " + data);
-        name = data;
+        console.log("Data reçues en creation : " + data.name);
+        name = data.name;
         socketDico[name] = new InfoPlayer();
-        socketDico[name].socket = socket;
+        socketDico[name].socketWrapper = socketWrapper;
 
-        socketDico[name].data = new UserJoinedData(data, { x: 70, y: 70 });
-        socket.emit("syncPosition", new MovementData(4 /* Teleportation */, { x: 70, y: 70 }, data));
-        socket.broadcast.emit("userJoined", socketDico[name].data);
+        socketDico[name].data = new UserJoinedData(name, { x: 70, y: 70 });
+        socketWrapper.emit("syncPosition", new MovementData(4 /* Teleportation */, { x: 70, y: 70 }, name));
+        socketWrapper.broadcast("userJoined", socketDico[name].data);
 
         for (var opponentName in socketDico) {
             if (opponentName != name)
@@ -90,32 +97,72 @@ var CounterTillSync = (function () {
     return CounterTillSync;
 })();
 
+var BaseData = (function () {
+    function BaseData() {
+        this.timeStampCreated = new Date().getTime();
+    }
+    BaseData.prototype.toString = function () {
+        var contenu = "";
+        contenu += "Created : " + this.timeStampCreated + "\r\n";
+        contenu += "Sended : " + this.timeStampSended + "\r\n";
+        ;
+        contenu += "Received by server : " + this.timeStampServerReceived + "\r\n";
+        ;
+        contenu += "Broadcasted by server : " + this.timeStampServerBroadcasted;
+        return contenu;
+    };
+    return BaseData;
+})();
+
 var InfoPlayer = (function () {
     function InfoPlayer() {
     }
     return InfoPlayer;
 })();
 
-var UserJoinedData = (function () {
+var CreatedData = (function (_super) {
+    __extends(CreatedData, _super);
+    function CreatedData(name) {
+        _super.call(this);
+        this.name = name;
+    }
+    return CreatedData;
+})(BaseData);
+
+var UserJoinedData = (function (_super) {
+    __extends(UserJoinedData, _super);
     function UserJoinedData(n, pos, skin) {
         if (typeof skin === "undefined") { skin = "bomberman"; }
+        _super.call(this);
         this.name = n;
         this.x = pos.x;
         this.y = pos.y;
         this.skinName = skin;
     }
     return UserJoinedData;
-})();
+})(BaseData);
 
-var MovementData = (function () {
+var MovementData = (function (_super) {
+    __extends(MovementData, _super);
     function MovementData(typ, pos, name) {
+        _super.call(this);
         this.finishingX = pos.x;
         this.finishingY = pos.y;
         this.typeMov = typ;
         this.name = name;
     }
     return MovementData;
-})();
+})(BaseData);
+
+var StopData = (function (_super) {
+    __extends(StopData, _super);
+    function StopData(position) {
+        _super.call(this);
+        this.x = position.x;
+        this.y = position.y;
+    }
+    return StopData;
+})(BaseData);
 
 var MovementType;
 (function (MovementType) {
@@ -127,11 +174,54 @@ var MovementType;
     MovementType[MovementType["Collided"] = 5] = "Collided";
 })(MovementType || (MovementType = {}));
 
-var StopData = (function () {
-    function StopData(position) {
-        this.x = position.x;
-        this.y = position.y;
+var BaseSocketWrapper = (function () {
+    function BaseSocketWrapper(socket) {
+        this.socket = socket;
     }
-    return StopData;
+    BaseSocketWrapper.prototype.on = function (eventName, callBack) {
+        this.socket.on(eventName, callBack);
+    };
+
+    BaseSocketWrapper.prototype.emit = function (evenement, data) {
+        this.socket.emit(evenement, data);
+    };
+
+    BaseSocketWrapper.prototype.setTimeStampSended = function (data) {
+        data.timeStampSended = new Date().getTime();
+    };
+    BaseSocketWrapper.prototype.setTimeStampServerReceived = function (data) {
+        data.timeStampServerReceived = new Date().getTime();
+    };
+    BaseSocketWrapper.prototype.setTimeStampServerBroadcasted = function (data) {
+        data.timeStampServerBroadcasted = new Date().getTime();
+    };
+    return BaseSocketWrapper;
 })();
+
+var ServeurSocketWrapper = (function (_super) {
+    __extends(ServeurSocketWrapper, _super);
+    function ServeurSocketWrapper() {
+        _super.apply(this, arguments);
+    }
+    ServeurSocketWrapper.prototype.broadcast = function (evenement, data) {
+        _super.prototype.setTimeStampServerBroadcasted.call(this, data);
+        this.socket.broadcast.emit(evenement, data);
+    };
+
+    //we timeStamp the recieving
+    ServeurSocketWrapper.prototype.on = function (eventName, callBack) {
+        var _this = this;
+        var newCallback = function (data) {
+            _super.prototype.setTimeStampServerReceived.call(_this, data);
+            callBack(data);
+        };
+        _super.prototype.on.call(this, eventName, newCallback);
+    };
+
+    ServeurSocketWrapper.prototype.emit = function (evenement, data) {
+        _super.prototype.setTimeStampSended.call(this, data);
+        _super.prototype.emit.call(this, evenement, data);
+    };
+    return ServeurSocketWrapper;
+})(BaseSocketWrapper);
 //# sourceMappingURL=server.js.map
