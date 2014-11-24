@@ -34,11 +34,13 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="Communication.ts" />
     <TypeScriptCompile Include="Scripts\typings\node\node.d.ts" />
     <TypeScriptCompile Include="server.ts" />
     <Content Include="package.json" />
     <Content Include="README.md" />
     <TypeScriptCompile Include="Scripts\typings\socket.io\socket.io.d.ts" />
+    <TypeScriptCompile Include="SocketData.ts" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Scripts\" />

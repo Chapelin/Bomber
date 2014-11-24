@@ -1,4 +1,6 @@
-﻿import http = require('http');
+﻿import Communication = require("./Communication");
+import SocketData = require("./SocketData")
+import http = require('http');
 import io = require("socket.io");
 var port = process.env.port || 1337;
 http.createServer(function (req, res) {
@@ -15,13 +17,13 @@ function handlesocket(socket: io.Socket) {
     console.log("Connected");
     var name = "";
     var cpt = new CounterTillSync(socket, 60, syncPosition);
-    var socketWrapper = new ServeurSocketWrapper(socket);
+    var socketWrapper = new Communication.ServeurSocketWrapper(socket);
     socketWrapper.on("created", handleCreation);
     socketWrapper.on("move", handleMove);
     socketWrapper.on("stoppedMovement", handleStop);
     socketWrapper.on("collided", handleCollided);
 
-    function handleCollided(data: MovementData) {
+    function handleCollided(data: SocketData.MovementData) {
         console.log("Collided", name);
         socketDico[name].data.x = data.finishingX;
         socketDico[name].data.y = data.finishingY;
@@ -33,10 +35,10 @@ function handlesocket(socket: io.Socket) {
 
     function syncPosition() {
         console.log("Sync of " + name);
-        socketWrapper.broadcast("syncPosition", new MovementData(null, { x: socketDico[name].data.x, y: socketDico[name].data.y }, name));
+        socketWrapper.broadcast("syncPosition", new SocketData.MovementData(null, { x: socketDico[name].data.x, y: socketDico[name].data.y }, name));
     }
 
-    function handleStop(data: StopData) {
+    function handleStop(data: SocketData.StopData) {
         console.log("Stopped : " + name);
         //TODO : check positions ?
         socketDico[name].data.x = data.x;
@@ -47,7 +49,7 @@ function handlesocket(socket: io.Socket) {
 
     }
 
-    function handleMove(data: MovementData) {
+    function handleMove(data: SocketData.MovementData) {
         console.log("Move : " + name);
         console.log(data.typeMov + " " + data.finishingX + " " + data.finishingY);
         //the name handling is server side to avoid cheat
@@ -58,14 +60,14 @@ function handlesocket(socket: io.Socket) {
         cpt.addCpt();
     }
 
-    function handleCreation(data: CreatedData) {
+    function handleCreation(data: SocketData.CreatedData) {
         console.log("Data reçues en creation : " + data.name);
         name = data.name;
         socketDico[name] = new InfoPlayer();
         socketDico[name].socketWrapper = socketWrapper;
 
-        socketDico[name].data = new UserJoinedData(name, { x: 70, y: 70 });
-        socketWrapper.emit("syncPosition", new MovementData(MovementType.Teleportation, { x: 70, y: 70 }, name));
+        socketDico[name].data = new SocketData.UserJoinedData(name, { x: 70, y: 70 });
+        socketWrapper.emit("syncPosition", new SocketData.MovementData(SocketData.MovementType.Teleportation, { x: 70, y: 70 }, name));
         socketWrapper.broadcast("userJoined", socketDico[name].data);
         //we notify the new player with the others
         for (var opponentName in socketDico) {
@@ -74,7 +76,6 @@ function handlesocket(socket: io.Socket) {
         }
     }
 }
-
 
 class CounterTillSync {
     cpt: number;
@@ -100,148 +101,11 @@ class CounterTillSync {
 
 }
 
-class BaseData {
-    public timeStampCreated: number;
-    public timeStampSended: number;
-    public timeStampServerReceived: number;
-    public timeStampServerBroadcasted: number;
-
-    constructor() {
-        this.timeStampCreated = new Date().getTime();
-    }
-
-    public toString(): string {
-        var contenu = "";
-        contenu += "Created : " + this.timeStampCreated + "\r\n";
-        contenu += "Sended : " + this.timeStampSended + "\r\n";;
-        contenu += "Received by server : " + this.timeStampServerReceived + "\r\n";;
-        contenu += "Broadcasted by server : " + this.timeStampServerBroadcasted;
-        return contenu;
-    }
-}
 
 class InfoPlayer {
-    socketWrapper: ServeurSocketWrapper;
-    data: UserJoinedData;
+    socketWrapper: Communication.ServeurSocketWrapper;
+    data: SocketData.UserJoinedData;
 
 }
 
-class CreatedData extends BaseData {
-    public name: string;
 
-    constructor(name: string) {
-        super();
-        this.name = name;
-    }
-}
-
-
-
-class UserJoinedData extends BaseData {
-    public name: string;
-    public x: number;
-    public y: number;
-    //Later use
-    public skinName: string;
-
-    constructor(n: string, pos: IPositionableElement, skin: string = "bomberman") {
-        super();
-        this.name = n;
-        this.x = pos.x;
-        this.y = pos.y;
-        this.skinName = skin;
-    }
-}
-
-class MovementData extends BaseData {
-    public typeMov: MovementType;
-    public finishingX: number;
-    public finishingY: number;
-    public name: string;
-
-    constructor(typ: MovementType, pos: IPositionableElement, name: string) {
-        super();
-        this.finishingX = pos.x;
-        this.finishingY = pos.y;
-        this.typeMov = typ;
-        this.name = name;
-    }
-
-}
-
-class StopData extends BaseData {
-    public name: string;
-    public x: number;
-    public y: number;
-
-    constructor(position: IPositionableElement) {
-        super();
-        this.x = position.x;
-        this.y = position.y;
-    }
-}
-
-interface IPositionableElement {
-    x: number;
-    y: number;
-}
-
-
-enum MovementType {
-    Down = 0,
-    Up,
-    Left,
-    Right,
-    Teleportation,
-    Collided
-}
-
-class BaseSocketWrapper {
-    public socket: io.Socket;
-
-    constructor(socket: io.Socket) {
-        this.socket = socket;
-    }
-
-    public on(eventName: string, callBack: Function) {
-
-        this.socket.on(eventName, callBack);
-    }
-
-    public emit(evenement: string, data: BaseData) {
-        this.socket.emit(evenement, data);
-    }
-
-    public setTimeStampSended(data: BaseData) {
-        data.timeStampSended = new Date().getTime();
-    }
-    public setTimeStampServerReceived(data: BaseData) {
-        data.timeStampServerReceived = new Date().getTime();
-    }
-    public setTimeStampServerBroadcasted(data: BaseData) {
-        data.timeStampServerBroadcasted = new Date().getTime();
-    }
-}
-
-
-class ServeurSocketWrapper extends BaseSocketWrapper {
-
-    public broadcast(evenement: string, data: BaseData) {
-        super.setTimeStampServerBroadcasted(data);
-        this.socket.broadcast.emit(evenement, data);
-    }
-
-    //we timeStamp the recieving
-    public on(eventName: string, callBack: Function) {
-        var newCallback: Function = (data: BaseData) => {
-            super.setTimeStampServerReceived(data);
-            callBack(data);
-        };
-        super.on(eventName, newCallback);
-    }
-
-    public emit(evenement: string, data: BaseData) {
-        super.setTimeStampSended(data);
-        super.emit(evenement, data);
-    }
-}
