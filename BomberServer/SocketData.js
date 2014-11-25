@@ -4,33 +4,29 @@
     __.prototype = b.prototype;
     d.prototype = new __();
 };
+var CarriageReturn = "\r\n";
+
 var BaseData = (function () {
     function BaseData() {
         this.timeStampCreated = new Date().getTime();
     }
-    BaseData.prototype.toString = function () {
+    BaseData.ToString = function (data) {
         var contenu = "";
-        contenu += "Created : " + this.timeStampCreated + "\r\n";
-        contenu += "Sended : " + this.timeStampSended + "\r\n";
+        if (data.timeStampCreated)
+            contenu += "Created : " + data.timeStampCreated + CarriageReturn;
+        if (data.timeStampSended)
+            contenu += "Sended : " + data.timeStampSended + CarriageReturn;
         ;
-        contenu += "Received by server : " + this.timeStampServerReceived + "\r\n";
+        if (data.timeStampServerReceived)
+            contenu += "Received by server : " + data.timeStampServerReceived + CarriageReturn;
         ;
-        contenu += "Broadcasted by server : " + this.timeStampServerBroadcasted;
+        if (data.timeStampServerBroadcasted)
+            contenu += "Broadcasted by server : " + data.timeStampServerBroadcasted + CarriageReturn;
         return contenu;
     };
     return BaseData;
 })();
 exports.BaseData = BaseData;
-
-var CreatedData = (function (_super) {
-    __extends(CreatedData, _super);
-    function CreatedData(name) {
-        _super.call(this);
-        this.name = name;
-    }
-    return CreatedData;
-})(BaseData);
-exports.CreatedData = CreatedData;
 
 var UserJoinedData = (function (_super) {
     __extends(UserJoinedData, _super);
@@ -42,6 +38,14 @@ var UserJoinedData = (function (_super) {
         this.y = pos.y;
         this.skinName = skin;
     }
+    UserJoinedData.ToString = function (data) {
+        var contenu = "User Joined" + CarriageReturn;
+        contenu += BaseData.ToString(data);
+        contenu += "Name : " + data.name + CarriageReturn;
+        contenu += "skinName : " + data.skinName + CarriageReturn;
+        contenu += "x,y : " + data.x + " | " + data.y + CarriageReturn;
+        return contenu;
+    };
     return UserJoinedData;
 })(BaseData);
 exports.UserJoinedData = UserJoinedData;
@@ -55,9 +59,33 @@ var MovementData = (function (_super) {
         this.typeMov = typ;
         this.name = name;
     }
+    MovementData.ToString = function (data) {
+        var contenu = "User moved" + CarriageReturn;
+        contenu += BaseData.ToString(data);
+        contenu += "Type movement : " + data.typeMov + CarriageReturn;
+        contenu += "Name : " + data.name + CarriageReturn;
+        contenu += "Position : " + data.finishingX + " | " + data.finishingY + CarriageReturn;
+        return contenu;
+    };
     return MovementData;
 })(BaseData);
 exports.MovementData = MovementData;
+
+var CreatedData = (function (_super) {
+    __extends(CreatedData, _super);
+    function CreatedData(name) {
+        _super.call(this);
+        this.name = name;
+    }
+    CreatedData.ToString = function (data) {
+        var contenu = "User Created" + CarriageReturn;
+        contenu += BaseData.ToString(data);
+        contenu += "Name : " + name + CarriageReturn;
+        return contenu;
+    };
+    return CreatedData;
+})(BaseData);
+exports.CreatedData = CreatedData;
 
 var StopData = (function (_super) {
     __extends(StopData, _super);
@@ -66,6 +94,13 @@ var StopData = (function (_super) {
         this.x = position.x;
         this.y = position.y;
     }
+    StopData.ToString = function (data) {
+        var contenu = "User stopped" + CarriageReturn;
+        contenu += BaseData.ToString(data);
+        contenu += "Name : " + name + CarriageReturn;
+        contenu += "Position : " + data.x + " | " + data.y + CarriageReturn;
+        return contenu;
+    };
     return StopData;
 })(BaseData);
 exports.StopData = StopData;

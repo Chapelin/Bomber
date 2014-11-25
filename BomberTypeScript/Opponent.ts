@@ -27,9 +27,10 @@
                 }
             }
 
-            if (this.x != content.finishingX || this.y != content.finishingY) {
-                console.log("Error movement for " + this.name + " waited : " + content.finishingX + "," + content.finishingY + " | current : " + this.x + ", " + this.y);
-            }
+            //commented out until usefull
+            //if (this.x != content.finishingX || this.y != content.finishingY) {
+            //    console.log("Error movement for " + this.name + " waited : " + content.finishingX + "," + content.finishingY + " | current : " + this.x + ", " + this.y);
+            //}
         }
 
         public moveDown() {

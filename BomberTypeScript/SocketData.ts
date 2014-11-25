@@ -1,21 +1,26 @@
 ﻿module Bomber {
+    var CarriageReturn = "\r\n";
 
     export class BaseData {
         public timeStampCreated: number;
         public timeStampSended: number;
         public timeStampServerReceived: number;
-        public timeStampServerBroadcasted : number;
+        public timeStampServerBroadcasted: number;
 
         constructor() {
             this.timeStampCreated = new Date().getTime();
         }
 
-        public toString() : string {
+        public static ToString(data: BaseData): string {
             var contenu = "";
-            contenu += "Created : " + this.timeStampCreated + "\r\n";
-            contenu += "Sended : " + this.timeStampSended + "\r\n";;
-            contenu += "Received by server : " + this.timeStampServerReceived + "\r\n";;
-            contenu += "Broadcasted by server : " + this.timeStampServerBroadcasted;
+            if (data.timeStampCreated)
+                contenu += "Created : " + data.timeStampCreated + CarriageReturn;
+            if (data.timeStampSended)
+                contenu += "Sended : " + data.timeStampSended + CarriageReturn;;
+            if (data.timeStampServerReceived)
+                contenu += "Received by server : " + data.timeStampServerReceived + CarriageReturn;;
+            if (data.timeStampServerBroadcasted)
+                contenu += "Broadcasted by server : " + data.timeStampServerBroadcasted + CarriageReturn;
             return contenu;
         }
     }
@@ -34,6 +39,16 @@
             this.y = pos.y;
             this.skinName = skin;
         }
+
+        public static ToString(data: UserJoinedData): string {
+            var contenu = "User Joined" + CarriageReturn;
+            contenu += BaseData.ToString(data);
+            contenu += "Name : " + data.name + CarriageReturn;
+            contenu += "skinName : " + data.skinName + CarriageReturn;
+            contenu += "x,y : " + data.x + " | " + data.y + CarriageReturn;
+            return contenu;
+
+        }
     }
 
     export class MovementData extends BaseData {
@@ -50,6 +65,15 @@
             this.name = name;
         }
 
+        public static ToString(data: MovementData): string {
+            var contenu = "User moved" + CarriageReturn;
+            contenu += BaseData.ToString(data);
+            contenu += "Type movement : " + data.typeMov + CarriageReturn;
+            contenu += "Name : " + data.name + CarriageReturn;
+            contenu += "Position : " + data.finishingX + " | " + data.finishingY + CarriageReturn;
+            return contenu;
+        }
+
     }
 
     export class CreatedData extends BaseData {
@@ -58,6 +82,13 @@
         constructor(name: string) {
             super();
             this.name = name;
+        }
+
+        public static ToString(data: CreatedData): string {
+            var contenu = "User Created" + CarriageReturn;
+            contenu += BaseData.ToString(data);
+            contenu += "Name : " + name + CarriageReturn;
+            return contenu;
         }
     }
 
@@ -71,13 +102,20 @@
             this.x = position.x;
             this.y = position.y;
         }
+
+        public static ToString(data: StopData): string {
+            var contenu = "User stopped" + CarriageReturn;
+            contenu += BaseData.ToString(data);
+            contenu += "Name : " + name + CarriageReturn;
+            contenu += "Position : " + data.x + " | " + data.y + CarriageReturn;
+            return contenu;
+        }
     }
 
     export interface IPositionableElement {
         x: number;
         y: number;
     }
-
 
     export enum MovementType {
         Down = 0,

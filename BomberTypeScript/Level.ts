@@ -80,7 +80,8 @@
         }
 
         handleCollided(data: MovementData) {
-            console.log(data.name + " collided");
+            console.log(" collided");
+            console.log(MovementData.ToString(data));
             this.others[data.name].position = new Phaser.Point(data.finishingX, data.finishingY);
         }
 
@@ -96,13 +97,12 @@
         }
 
         handleUserMoved(data: MovementData) {
-            console.log(data);
-            console.log(data.name + " Moved");
+            console.log(MovementData.ToString(data));
             this.others[data.name].handleMovement(data);
         }
 
         handleUserJoined(data: UserJoinedData) {
-            console.log(data.name + " joined");
+            console.log(UserJoinedData.ToString(data));
             this.others[data.name] = new Opponent(this.game, data.name, data.x, data.y, data.skinName, 1);
         }
         handleUserQuit(data: string) {
@@ -110,12 +110,13 @@
             this.others[data] = null;
         }
         handleStoppedMovement(data: StopData) {
-            console.log(data.name + " stopped");
+            console.log(StopData.ToString(data));
             this.others[data.name].stop();
         }
 
         handleObjectSyncPosition(content: MovementData) {
-            console.log(content.name + "sync position");
+            console.log("sync position");
+            console.log(MovementData.ToString(content));
             var synced: MovingObject = null;
             if (this.joueur.name == content.name) {
                 synced = this.joueur;

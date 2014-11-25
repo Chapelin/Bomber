@@ -186,7 +186,8 @@ var Bomber;
         };
 
         Level.prototype.handleCollided = function (data) {
-            console.log(data.name + " collided");
+            console.log(" collided");
+            console.log(Bomber.MovementData.ToString(data));
             this.others[data.name].position = new Phaser.Point(data.finishingX, data.finishingY);
         };
 
@@ -202,13 +203,12 @@ var Bomber;
         };
 
         Level.prototype.handleUserMoved = function (data) {
-            console.log(data);
-            console.log(data.name + " Moved");
+            console.log(Bomber.MovementData.ToString(data));
             this.others[data.name].handleMovement(data);
         };
 
         Level.prototype.handleUserJoined = function (data) {
-            console.log(data.name + " joined");
+            console.log(Bomber.UserJoinedData.ToString(data));
             this.others[data.name] = new Bomber.Opponent(this.game, data.name, data.x, data.y, data.skinName, 1);
         };
         Level.prototype.handleUserQuit = function (data) {
@@ -216,12 +216,13 @@ var Bomber;
             this.others[data] = null;
         };
         Level.prototype.handleStoppedMovement = function (data) {
-            console.log(data.name + " stopped");
+            console.log(Bomber.StopData.ToString(data));
             this.others[data.name].stop();
         };
 
         Level.prototype.handleObjectSyncPosition = function (content) {
-            console.log(content.name + "sync position");
+            console.log("sync position");
+            console.log(Bomber.MovementData.ToString(content));
             var synced = null;
             if (this.joueur.name == content.name) {
                 synced = this.joueur;
@@ -360,10 +361,10 @@ var Bomber;
                     }
                 }
             }
-
-            if (this.x != content.finishingX || this.y != content.finishingY) {
-                console.log("Error movement for " + this.name + " waited : " + content.finishingX + "," + content.finishingY + " | current : " + this.x + ", " + this.y);
-            }
+            //commented out until usefull
+            //if (this.x != content.finishingX || this.y != content.finishingY) {
+            //    console.log("Error movement for " + this.name + " waited : " + content.finishingX + "," + content.finishingY + " | current : " + this.x + ", " + this.y);
+            //}
         };
 
         Opponent.prototype.moveDown = function () {
@@ -402,18 +403,24 @@ var Bomber;
 })(Bomber || (Bomber = {}));
 var Bomber;
 (function (Bomber) {
+    var CarriageReturn = "\r\n";
+
     var BaseData = (function () {
         function BaseData() {
             this.timeStampCreated = new Date().getTime();
         }
-        BaseData.prototype.toString = function () {
+        BaseData.ToString = function (data) {
             var contenu = "";
-            contenu += "Created : " + this.timeStampCreated + "\r\n";
-            contenu += "Sended : " + this.timeStampSended + "\r\n";
+            if (data.timeStampCreated)
+                contenu += "Created : " + data.timeStampCreated + CarriageReturn;
+            if (data.timeStampSended)
+                contenu += "Sended : " + data.timeStampSended + CarriageReturn;
             ;
-            contenu += "Received by server : " + this.timeStampServerReceived + "\r\n";
+            if (data.timeStampServerReceived)
+                contenu += "Received by server : " + data.timeStampServerReceived + CarriageReturn;
             ;
-            contenu += "Broadcasted by server : " + this.timeStampServerBroadcasted;
+            if (data.timeStampServerBroadcasted)
+                contenu += "Broadcasted by server : " + data.timeStampServerBroadcasted + CarriageReturn;
             return contenu;
         };
         return BaseData;
@@ -430,6 +437,14 @@ var Bomber;
             this.y = pos.y;
             this.skinName = skin;
         }
+        UserJoinedData.ToString = function (data) {
+            var contenu = "User Joined" + CarriageReturn;
+            contenu += BaseData.ToString(data);
+            contenu += "Name : " + data.name + CarriageReturn;
+            contenu += "skinName : " + data.skinName + CarriageReturn;
+            contenu += "x,y : " + data.x + " | " + data.y + CarriageReturn;
+            return contenu;
+        };
         return UserJoinedData;
     })(BaseData);
     Bomber.UserJoinedData = UserJoinedData;
@@ -443,6 +458,14 @@ var Bomber;
             this.typeMov = typ;
             this.name = name;
         }
+        MovementData.ToString = function (data) {
+            var contenu = "User moved" + CarriageReturn;
+            contenu += BaseData.ToString(data);
+            contenu += "Type movement : " + data.typeMov + CarriageReturn;
+            contenu += "Name : " + data.name + CarriageReturn;
+            contenu += "Position : " + data.finishingX + " | " + data.finishingY + CarriageReturn;
+            return contenu;
+        };
         return MovementData;
     })(BaseData);
     Bomber.MovementData = MovementData;
@@ -453,6 +476,12 @@ var Bomber;
             _super.call(this);
             this.name = name;
         }
+        CreatedData.ToString = function (data) {
+            var contenu = "User Created" + CarriageReturn;
+            contenu += BaseData.ToString(data);
+            contenu += "Name : " + name + CarriageReturn;
+            return contenu;
+        };
         return CreatedData;
     })(BaseData);
     Bomber.CreatedData = CreatedData;
@@ -464,6 +493,13 @@ var Bomber;
             this.x = position.x;
             this.y = position.y;
         }
+        StopData.ToString = function (data) {
+            var contenu = "User stopped" + CarriageReturn;
+            contenu += BaseData.ToString(data);
+            contenu += "Name : " + name + CarriageReturn;
+            contenu += "Position : " + data.x + " | " + data.y + CarriageReturn;
+            return contenu;
+        };
         return StopData;
     })(BaseData);
     Bomber.StopData = StopData;
