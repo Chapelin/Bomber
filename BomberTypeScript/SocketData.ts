@@ -112,6 +112,23 @@
         }
     }
 
+    export class QuittedData extends BaseData {
+        public name;
+
+        constructor(n: string) {
+            super();
+            this.name = n;
+        }
+
+        public static ToString(data: QuittedData): string {
+            var contenu = "User quitted" + CarriageReturn;
+            contenu += BaseData.ToString(data);
+            contenu += "Name : " + name + CarriageReturn;
+            return contenu;
+
+        }
+    }
+
     export interface IPositionableElement {
         x: number;
         y: number;

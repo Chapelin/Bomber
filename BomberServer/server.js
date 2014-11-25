@@ -77,6 +77,8 @@ function handlesocket(socket) {
 
     function handleDisconnect() {
         console.log(name + " disconnected");
+        var quitted = new SocketData.QuittedData(name);
+        socketWrapper.broadcast("userQuit", quitted);
     }
 }
 

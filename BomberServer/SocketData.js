@@ -105,6 +105,22 @@ var StopData = (function (_super) {
 })(BaseData);
 exports.StopData = StopData;
 
+var QuittedData = (function (_super) {
+    __extends(QuittedData, _super);
+    function QuittedData(n) {
+        _super.call(this);
+        this.name = n;
+    }
+    QuittedData.ToString = function (data) {
+        var contenu = "User quitted" + CarriageReturn;
+        contenu += BaseData.ToString(data);
+        contenu += "Name : " + name + CarriageReturn;
+        return contenu;
+    };
+    return QuittedData;
+})(BaseData);
+exports.QuittedData = QuittedData;
+
 (function (MovementType) {
     MovementType[MovementType["Down"] = 0] = "Down";
     MovementType[MovementType["Up"] = 1] = "Up";

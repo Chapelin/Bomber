@@ -212,11 +212,11 @@ var Bomber;
             this.others[data.name] = new Bomber.Opponent(this.game, data.name, data.x, data.y, data.skinName, 1);
         };
         Level.prototype.handleUserQuit = function (data) {
-            console.log(data + " quitted");
+            console.log(Bomber.QuittedData.ToString(data));
 
             //TODO : better deletion handling
-            this.others[data].kill();
-            this.others[data] = null;
+            this.others[data.name].kill();
+            this.others[data.name] = null;
         };
         Level.prototype.handleStoppedMovement = function (data) {
             console.log(Bomber.StopData.ToString(data));
@@ -506,6 +506,22 @@ var Bomber;
         return StopData;
     })(BaseData);
     Bomber.StopData = StopData;
+
+    var QuittedData = (function (_super) {
+        __extends(QuittedData, _super);
+        function QuittedData(n) {
+            _super.call(this);
+            this.name = n;
+        }
+        QuittedData.ToString = function (data) {
+            var contenu = "User quitted" + CarriageReturn;
+            contenu += BaseData.ToString(data);
+            contenu += "Name : " + name + CarriageReturn;
+            return contenu;
+        };
+        return QuittedData;
+    })(BaseData);
+    Bomber.QuittedData = QuittedData;
 
     (function (MovementType) {
         MovementType[MovementType["Down"] = 0] = "Down";

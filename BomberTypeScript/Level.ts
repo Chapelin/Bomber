@@ -105,11 +105,11 @@
             console.log(UserJoinedData.ToString(data));
             this.others[data.name] = new Opponent(this.game, data.name, data.x, data.y, data.skinName, 1);
         }
-        handleUserQuit(data: string) {
-            console.log(data + " quitted");
+        handleUserQuit(data: QuittedData) {
+            console.log(QuittedData.ToString(data));
             //TODO : better deletion handling
-            this.others[data].kill();
-            this.others[data] = null;
+            this.others[data.name].kill();
+            this.others[data.name] = null;
         }
         handleStoppedMovement(data: StopData) {
             console.log(StopData.ToString(data));
