@@ -213,6 +213,9 @@ var Bomber;
         };
         Level.prototype.handleUserQuit = function (data) {
             console.log(data + " quitted");
+
+            //TODO : better deletion handling
+            this.others[data].kill();
             this.others[data] = null;
         };
         Level.prototype.handleStoppedMovement = function (data) {

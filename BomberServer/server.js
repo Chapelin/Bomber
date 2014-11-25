@@ -7,7 +7,6 @@ http.createServer(function (req, res) {
     res.writeHead(200, { 'Content-Type': 'text/plain' });
     res.end('Hello World\n');
 }).listen(port);
-
 var manager = io.listen(3000);
 manager.on("connection", handlesocket);
 var socketDico = {};
@@ -21,6 +20,7 @@ function handlesocket(socket) {
     socketWrapper.on("move", handleMove);
     socketWrapper.on("stoppedMovement", handleStop);
     socketWrapper.on("collided", handleCollided);
+    socketWrapper.on("disconnect", handleDisconnect);
 
     function handleCollided(data) {
         console.log("Collided", name);
@@ -73,6 +73,10 @@ function handlesocket(socket) {
             if (opponentName != name)
                 socket.emit("userJoined", socketDico[opponentName].data);
         }
+    }
+
+    function handleDisconnect() {
+        console.log(name + " disconnected");
     }
 }
 

@@ -107,6 +107,8 @@
         }
         handleUserQuit(data: string) {
             console.log(data + " quitted");
+            //TODO : better deletion handling
+            this.others[data].kill();
             this.others[data] = null;
         }
         handleStoppedMovement(data: StopData) {
